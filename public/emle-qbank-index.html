@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>EMLE QBank – Egypt's #1 Medical Licensing Exam Prep</title>
+<meta name="description" content="The most advanced EMLE preparation platform. 4000+ high-yield questions, AI question generator, smart flashcards, and detailed analytics."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN SYSTEM — EMLE QBank
+   Clean, premium, medical-grade interface
+   Primary: Deep Navy + Bright Clinical Blue
+═══════════════════════════════════════════ */
+:root{
+  --blue:#0057FF;--blue-dark:#0040CC;--blue-mid:#1A6BFF;
+  --blue-glow:rgba(0,87,255,.1);--blue-soft:rgba(0,87,255,.06);
+  --navy:#0A1628;--navy-mid:#111D35;
+  --teal:#00C9A7;--green:#10B981;--amber:#F59E0B;--red:#EF4444;
+  --bg:#F5F7FA;--bg-white:#FFFFFF;--bg-card:#FFFFFF;
+  --text:#0D1B2A;--text-mid:#3D5166;--text-muted:#7A8FA6;
+  --border:#E3E9F2;--border-light:#EDF1F7;
+  --radius:10px;--radius-lg:16px;--radius-xl:24px;
+  --shadow:0 2px 12px rgba(13,27,42,.07);
+  --shadow-md:0 6px 24px rgba(13,27,42,.1);
+  --shadow-blue:0 8px 32px rgba(0,87,255,.22);
+  --font:'Plus Jakarta Sans',system-ui,sans-serif;
+  --font-serif:'Instrument Serif',Georgia,serif;
+  --transition:all .22s cubic-bezier(.4,0,.2,1);
+}
+[data-theme="dark"]{
+  --bg:#0A1628;--bg-white:#111D35;--bg-card:#152035;
+  --text:#EDF2F8;--text-mid:#A8BBCF;--text-muted:#5A7290;
+  --border:#1E3050;--border-light:#1A2B45;
+  --shadow:0 2px 12px rgba(0,0,0,.35);
+  --shadow-md:0 6px 24px rgba(0,0,0,.45);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden;transition:background .3s,color .3s}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+
+/* ── TYPOGRAPHY ── */
+.display{font-family:var(--font-serif);font-style:italic}
+.label-sm{font-size:11px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--blue);display:block;margin-bottom:10px}
+.h1{font-size:clamp(36px,5vw,64px);font-weight:800;line-height:1.1;letter-spacing:-.02em}
+.h2{font-size:clamp(26px,3.5vw,42px);font-weight:800;line-height:1.2;letter-spacing:-.01em}
+.h3{font-size:20px;font-weight:700;line-height:1.35}
+.body-lg{font-size:17px;color:var(--text-mid);line-height:1.75}
+.body-md{font-size:15px;color:var(--text-mid);line-height:1.7}
+
+/* ── LAYOUT ── */
+.container{max-width:1180px;margin:0 auto;padding:0 24px}
+.section{padding:88px 0}
+.section-header{text-align:center;margin-bottom:60px}
+.section-header .h2{margin-bottom:14px}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:var(--radius);font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;border:none;transition:var(--transition);text-decoration:none}
+.btn-primary{background:var(--blue);color:#fff;box-shadow:0 4px 16px rgba(0,87,255,.35)}
+.btn-primary:hover{background:var(--blue-dark);transform:translateY(-2px);box-shadow:var(--shadow-blue)}
+.btn-xl{padding:16px 36px;font-size:16px;border-radius:var(--radius-lg)}
+.btn-outline{background:transparent;color:var(--blue);border:2px solid var(--blue)}
+.btn-outline:hover{background:var(--blue-glow);transform:translateY(-1px)}
+.btn-ghost{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.25)}
+.btn-ghost:hover{background:rgba(255,255,255,.2)}
+.btn-white{background:#fff;color:var(--blue);box-shadow:0 4px 16px rgba(0,0,0,.12)}
+.btn-white:hover{background:#f0f4ff;transform:translateY(-2px)}
+
+/* ── BADGE ── */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:100px;font-size:12px;font-weight:700}
+.badge-blue{background:var(--blue-soft);color:var(--blue);border:1px solid rgba(0,87,255,.15)}
+.badge-green{background:rgba(16,185,129,.1);color:var(--green)}
+.badge-amber{background:rgba(245,158,11,.1);color:var(--amber)}
+.badge-teal{background:rgba(0,201,167,.1);color:var(--teal)}
+
+/* ── CARD ── */
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:24px}
+
+/* ══════════════════════════════════════
+   NAVBAR
+══════════════════════════════════════ */
+.navbar{position:fixed;top:0;left:0;right:0;z-index:1000;height:64px;background:rgba(245,247,250,.92);backdrop-filter:blur(24px) saturate(180%);border-bottom:1px solid var(--border);transition:var(--transition)}
+[data-theme="dark"] .navbar{background:rgba(10,22,40,.92)}
+.nav-inner{max-width:1180px;margin:0 auto;padding:0 24px;height:100%;display:flex;align-items:center;gap:20px}
+.nav-logo{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.logo-mark{width:36px;height:36px;background:var(--blue);border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,87,255,.4)}
+.logo-mark svg{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:2.5}
+.logo-text{font-size:17px;font-weight:800;letter-spacing:-.3px}
+.logo-text span{color:var(--blue)}
+.nav-links{display:flex;align-items:center;gap:2px;margin-right:auto;margin-left:32px}
+.nav-links a{padding:7px 13px;border-radius:8px;font-size:14px;font-weight:600;color:var(--text-mid);transition:var(--transition)}
+.nav-links a:hover,.nav-links a.active{color:var(--blue);background:var(--blue-soft)}
+.nav-right{display:flex;align-items:center;gap:8px}
+.nav-user-pill{display:flex;align-items:center;gap:7px;padding:5px 12px 5px 6px;background:var(--blue-soft);border-radius:100px;font-size:13px;font-weight:700;color:var(--blue);cursor:pointer}
+.nav-avatar{width:24px;height:24px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff}
+.theme-toggle{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--bg-card);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:var(--transition)}
+.theme-toggle:hover{transform:scale(1.1);border-color:var(--blue)}
+.hamburger{display:none;background:none;border:none;cursor:pointer;font-size:22px;color:var(--text);padding:4px}
+@media(max-width:768px){
+  .nav-links{display:none;position:absolute;top:64px;left:0;right:0;background:var(--bg-card);flex-direction:column;align-items:stretch;padding:12px;border-bottom:1px solid var(--border);gap:2px;box-shadow:var(--shadow-md)}
+  .nav-links.open{display:flex}
+  .hamburger{display:block}
+  .nav-links a{padding:10px 16px;border-radius:8px}
+}
+
+/* ══════════════════════════════════════
+   HERO
+══════════════════════════════════════ */
+.hero{min-height:100vh;display:flex;align-items:center;padding-top:64px;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:linear-gradient(145deg,#EEF4FF 0%,#F5F7FA 55%,#E8F5FF 100%)}
+[data-theme="dark"] .hero-bg{background:linear-gradient(145deg,#0A1628 0%,#0D1B35 55%,#0A1F3A 100%)}
+/* grid pattern */
+.hero-bg::before{content:'';position:absolute;inset:0;background-image:linear-gradient(var(--border-light) 1px,transparent 1px),linear-gradient(90deg,var(--border-light) 1px,transparent 1px);background-size:48px 48px;opacity:.5}
+/* glow */
+.hero-bg::after{content:'';position:absolute;top:-200px;right:-200px;width:700px;height:700px;background:radial-gradient(circle,rgba(0,87,255,.08) 0%,transparent 65%);border-radius:50%}
+.hero-content{max-width:1180px;margin:0 auto;padding:80px 24px;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;position:relative;z-index:1}
+@media(max-width:960px){.hero-content{grid-template-columns:1fr;text-align:center;gap:48px;padding:60px 24px}}
+
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--bg-card);border:1px solid var(--border);border-radius:100px;padding:6px 14px;margin-bottom:22px;font-size:13px;font-weight:600;color:var(--text-mid);box-shadow:var(--shadow)}
+.hero-eyebrow-dot{width:7px;height:7px;background:var(--green);border-radius:50%;position:relative}
+.hero-eyebrow-dot::after{content:'';position:absolute;inset:-3px;background:var(--green);border-radius:50%;opacity:.4;animation:pulse-dot 1.8s ease infinite}
+@keyframes pulse-dot{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(1.8);opacity:0}}
+
+.hero-title{margin-bottom:12px}
+.hero-title em{color:var(--blue);font-style:normal}
+.hero-tagline{font-size:clamp(18px,2.5vw,28px);font-family:var(--font-serif);font-style:italic;color:var(--text-mid);margin-bottom:20px}
+.hero-desc{font-size:17px;color:var(--text-mid);line-height:1.8;margin-bottom:36px;max-width:500px}
+@media(max-width:960px){.hero-desc{margin:0 auto 36px}}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:44px}
+@media(max-width:960px){.hero-cta{justify-content:center}}
+.hero-stats{display:flex;gap:32px}
+@media(max-width:960px){.hero-stats{justify-content:center}}
+.hstat-num{font-size:28px;font-weight:800;letter-spacing:-.02em;color:var(--text)}
+.hstat-num span{color:var(--blue)}
+.hstat-label{font-size:12px;color:var(--text-muted);font-weight:500;margin-top:2px}
+.hstat-divider{width:1px;background:var(--border);align-self:stretch}
+
+/* ── HERO VISUAL (Exam Mockup) ── */
+.hero-visual{position:relative;display:flex;justify-content:center}
+@media(max-width:960px){.hero-visual{display:none}}
+.mockup-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-xl);box-shadow:0 24px 64px rgba(13,27,42,.12);overflow:hidden;width:100%;max-width:440px;animation:float 5s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+[data-theme="dark"] .mockup-card{box-shadow:0 24px 64px rgba(0,0,0,.4)}
+.mockup-topbar{background:var(--blue);padding:13px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.mockup-brand{font-size:13px;font-weight:800;color:#fff;display:flex;align-items:center;gap:6px}
+.mockup-timer{background:rgba(255,255,255,.2);padding:4px 12px;border-radius:100px;font-size:13px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums}
+.mockup-body{padding:18px}
+.mockup-qmeta{display:flex;align-items:center;gap:6px;margin-bottom:10px}
+.mockup-badge{padding:2px 8px;border-radius:100px;font-size:10px;font-weight:700;background:rgba(239,68,68,.1);color:#DC2626}
+.mockup-badge.surg{background:rgba(59,130,246,.1);color:#2563EB}
+.mkq-num{font-size:10px;color:var(--text-muted);font-weight:600;margin-right:auto}
+.mockup-q{font-size:13px;font-weight:600;line-height:1.65;color:var(--text);margin-bottom:14px}
+.mockup-opts{display:flex;flex-direction:column;gap:6px}
+.mockup-opt{display:flex;align-items:flex-start;gap:8px;padding:9px 11px;border-radius:8px;border:1.5px solid var(--border);font-size:12px;color:var(--text-mid)}
+.mockup-opt.correct{background:rgba(16,185,129,.07);border-color:var(--green);color:var(--green);font-weight:700}
+.mockup-opt.wrong{background:rgba(239,68,68,.06);border-color:var(--red);color:var(--red)}
+.opt-lt{width:20px;height:20px;border-radius:50%;background:var(--bg);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0}
+.mockup-opt.correct .opt-lt{background:var(--green);border-color:var(--green);color:#fff}
+.mockup-opt.wrong .opt-lt{background:var(--red);border-color:var(--red);color:#fff}
+.mockup-exp{margin-top:10px;padding:10px 12px;background:var(--blue-soft);border-radius:8px;border-right:3px solid var(--blue)}
+.mockup-exp-lbl{font-size:9px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px}
+.mockup-exp-txt{font-size:11px;color:var(--text-mid);line-height:1.6}
+.mockup-foot{padding:11px 18px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.mockup-prog-bar{flex:1;height:3px;background:var(--border);border-radius:100px;overflow:hidden}
+.mockup-prog-fill{height:100%;width:37%;background:var(--blue);border-radius:100px}
+.mockup-prog-lbl{font-size:10px;font-weight:700;color:var(--text-muted)}
+/* Floating badges */
+.float-card{position:absolute;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:10px 14px;box-shadow:var(--shadow-md);display:flex;align-items:center;gap:9px;white-space:nowrap}
+.float-card.top-left{top:-18px;left:-28px;animation:float 4s ease-in-out infinite .6s}
+.float-card.bot-right{bottom:12px;right:-24px;animation:float 5s ease-in-out infinite 1.2s}
+.fc-icon{font-size:20px}
+.fc-lbl{font-size:11px;color:var(--text-muted)}
+.fc-val{font-size:13px;font-weight:800}
+
+/* ══════════════════════════════════════
+   TRUST BAR
+══════════════════════════════════════ */
+.trust-bar{padding:18px 0;background:var(--bg-card);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.trust-inner{max-width:1180px;margin:0 auto;padding:0 24px;display:flex;align-items:center;gap:20px;overflow-x:auto;scrollbar-width:none}
+.trust-inner::-webkit-scrollbar{display:none}
+.trust-lbl{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;white-space:nowrap;flex-shrink:0}
+.trust-sep{width:1px;height:24px;background:var(--border);flex-shrink:0}
+.trust-logos{display:flex;align-items:center;gap:28px;flex-wrap:nowrap}
+.trust-logo{font-size:13px;font-weight:700;color:var(--text-muted);white-space:nowrap;opacity:.65;transition:var(--transition)}
+.trust-logo:hover{opacity:1;color:var(--blue)}
+
+/* ══════════════════════════════════════
+   FEATURES
+══════════════════════════════════════ */
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:900px){.features-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:540px){.features-grid{grid-template-columns:1fr}}
+.feat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;transition:var(--transition);position:relative;overflow:hidden}
+.feat-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--blue-soft),transparent);opacity:0;transition:var(--transition)}
+.feat-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-md);border-color:rgba(0,87,255,.2)}
+.feat-card:hover::before{opacity:1}
+.feat-icon{width:48px;height:48px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:18px;position:relative;z-index:1}
+.feat-title{font-size:17px;font-weight:700;margin-bottom:8px;position:relative;z-index:1}
+.feat-desc{font-size:14px;color:var(--text-mid);line-height:1.75;position:relative;z-index:1}
+.feat-link{display:inline-flex;align-items:center;gap:5px;margin-top:12px;font-size:13px;font-weight:700;color:var(--blue);position:relative;z-index:1;transition:var(--transition)}
+.feat-link:hover{gap:8px}
+
+/* ══════════════════════════════════════
+   STATS BAND
+══════════════════════════════════════ */
+.stats-band{background:var(--navy);padding:64px 0;position:relative;overflow:hidden}
+.stats-band::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='48' height='48' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='24' cy='24' r='1.5' fill='%23ffffff' fill-opacity='0.04'/%3E%3C/svg%3E")}
+.stats-inner{max-width:1180px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:repeat(4,1fr);gap:32px;position:relative;z-index:1;text-align:center}
+@media(max-width:640px){.stats-inner{grid-template-columns:1fr 1fr;gap:24px}}
+.stat-val{font-size:48px;font-weight:800;color:#fff;line-height:1;letter-spacing:-.03em;margin-bottom:6px}
+.stat-val em{color:var(--teal);font-style:normal}
+.stat-lbl{font-size:14px;color:rgba(255,255,255,.6);font-weight:500}
+
+/* ══════════════════════════════════════
+   HOW IT WORKS
+══════════════════════════════════════ */
+.hiw-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;position:relative}
+.hiw-steps::before{content:'';position:absolute;top:36px;left:14%;right:14%;height:2px;background:linear-gradient(to right,var(--border),var(--blue),var(--border));z-index:0}
+@media(max-width:768px){.hiw-steps{grid-template-columns:1fr 1fr}.hiw-steps::before{display:none}}
+@media(max-width:420px){.hiw-steps{grid-template-columns:1fr}}
+.hiw-step{text-align:center;position:relative;z-index:1}
+.hiw-circle{width:72px;height:72px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;border:4px solid var(--bg);box-shadow:var(--shadow-blue)}
+.hiw-num{font-size:22px;font-weight:800;color:#fff}
+.hiw-title{font-size:15px;font-weight:700;margin-bottom:7px}
+.hiw-desc{font-size:13px;color:var(--text-muted);line-height:1.7}
+
+/* ══════════════════════════════════════
+   SUBJECTS
+══════════════════════════════════════ */
+.subjects-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:768px){.subjects-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.subjects-grid{grid-template-columns:1fr}}
+.subj-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;display:flex;align-items:center;gap:14px;transition:var(--transition)}
+.subj-card:hover{border-color:var(--blue);box-shadow:var(--shadow);transform:translateX(3px)}
+.subj-icon{width:48px;height:48px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.subj-name{font-size:15px;font-weight:700;margin-bottom:3px}
+.subj-meta{font-size:12px;color:var(--text-muted);margin-bottom:8px}
+.subj-bar{height:4px;background:var(--border);border-radius:100px;overflow:hidden}
+.subj-fill{height:100%;border-radius:100px}
+.subj-pct{font-size:11px;font-weight:700;color:var(--text-muted);margin-top:3px}
+
+/* ══════════════════════════════════════
+   PRICING
+══════════════════════════════════════ */
+.pricing-section{background:var(--bg-card);padding:88px 0}
+.plans-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:1024px){.plans-grid{grid-template-columns:1fr 1fr;gap:16px}}
+@media(max-width:520px){.plans-grid{grid-template-columns:1fr}}
+.plan-card{background:var(--bg);border:2px solid var(--border);border-radius:var(--radius-lg);padding:24px 20px;display:flex;flex-direction:column;transition:var(--transition);position:relative;overflow:hidden}
+.plan-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-md);border-color:rgba(0,87,255,.25)}
+.plan-card.popular{background:var(--blue);border-color:var(--blue);transform:scale(1.04);box-shadow:var(--shadow-blue)}
+.plan-card.popular:hover{transform:scale(1.04) translateY(-5px)}
+.popular-ribbon{position:absolute;top:14px;right:14px;background:#FFD166;color:#000;font-size:10px;font-weight:900;padding:3px 10px;border-radius:100px;letter-spacing:.3px}
+.plan-dur{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:6px}
+.plan-card.popular .plan-dur{color:rgba(255,255,255,.65)}
+.plan-price{font-size:38px;font-weight:800;letter-spacing:-.02em;color:var(--text);line-height:1;margin-bottom:2px}
+.plan-card.popular .plan-price{color:#fff}
+.plan-curr{font-size:14px;font-weight:700;vertical-align:top;margin-top:6px;display:inline-block}
+.plan-mo{font-size:13px;color:var(--text-muted);margin-bottom:14px}
+.plan-card.popular .plan-mo{color:rgba(255,255,255,.6)}
+.ai-pill{display:inline-flex;align-items:center;gap:5px;background:var(--blue-soft);border-radius:100px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--blue);margin-bottom:14px;border:1px solid rgba(0,87,255,.12)}
+.plan-card.popular .ai-pill{background:rgba(255,255,255,.15);color:#fff;border-color:transparent}
+.plan-sep{height:1px;background:var(--border);margin:12px 0}
+.plan-card.popular .plan-sep{background:rgba(255,255,255,.18)}
+.plan-feats{display:flex;flex-direction:column;gap:9px;flex:1;margin-bottom:18px}
+.pf{display:flex;align-items:flex-start;gap:7px;font-size:13px;color:var(--text-mid);line-height:1.5}
+.plan-card.popular .pf{color:rgba(255,255,255,.85)}
+.pf-ok{color:var(--green);font-size:14px;flex-shrink:0;margin-top:1px}
+.plan-card.popular .pf-ok{color:#4ADE80}
+.pf-no{color:var(--text-muted);font-size:13px;flex-shrink:0;margin-top:2px;opacity:.5}
+.btn-plan{width:100%;padding:12px;border-radius:var(--radius);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);transition:var(--transition);border:none}
+.btn-plan-blue{background:var(--blue);color:#fff}
+.btn-plan-blue:hover{background:var(--blue-dark)}
+.btn-plan-white{background:#fff;color:var(--blue)}
+.btn-plan-white:hover{background:#FFD166;color:#000}
+.plan-footnote{text-align:center;margin-top:8px;font-size:11px;color:var(--text-muted)}
+.plan-card.popular .plan-footnote{color:rgba(255,255,255,.5)}
+
+/* ══════════════════════════════════════
+   TESTIMONIALS
+══════════════════════════════════════ */
+.test-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:768px){.test-grid{grid-template-columns:1fr}}
+.test-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:26px;transition:var(--transition)}
+.test-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+.test-stars{color:#FBBF24;font-size:15px;margin-bottom:13px;letter-spacing:2px}
+.test-quote{font-size:14.5px;color:var(--text-mid);line-height:1.8;margin-bottom:18px;font-style:italic}
+.test-author{display:flex;align-items:center;gap:11px}
+.test-av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;flex-shrink:0}
+.test-name{font-size:14px;font-weight:700}
+.test-role{font-size:12px;color:var(--text-muted)}
+.test-pass-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(16,185,129,.1);color:var(--green);font-size:11px;font-weight:700;padding:2px 8px;border-radius:100px;margin-top:3px}
+
+/* ══════════════════════════════════════
+   CTA SECTION
+══════════════════════════════════════ */
+.cta-section{background:linear-gradient(135deg,var(--navy) 0%,#0D2050 100%);padding:88px 0;position:relative;overflow:hidden}
+.cta-section::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 70% 50%,rgba(0,87,255,.18),transparent 60%)}
+.cta-inner{position:relative;z-index:1;text-align:center;max-width:700px;margin:0 auto;padding:0 24px}
+.cta-title{font-size:clamp(26px,4vw,44px);font-weight:800;color:#fff;margin-bottom:14px;letter-spacing:-.02em}
+.cta-sub{font-size:17px;color:rgba(255,255,255,.7);margin-bottom:36px;line-height:1.7}
+.cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+/* ══════════════════════════════════════
+   FOOTER
+══════════════════════════════════════ */
+.footer{background:#060F1D;padding:56px 0 28px;color:rgba(255,255,255,.75)}
+.footer-grid{max-width:1180px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px}
+@media(max-width:768px){.footer-grid{grid-template-columns:1fr 1fr;gap:28px}}
+@media(max-width:480px){.footer-grid{grid-template-columns:1fr}}
+.footer-brand-logo{display:flex;align-items:center;gap:9px;font-size:17px;font-weight:800;color:#fff;margin-bottom:12px}
+.footer-brand-logo .logo-mark{width:30px;height:30px;border-radius:8px}
+.footer-brand-logo .logo-mark svg{width:17px;height:17px}
+.footer-desc{font-size:13.5px;color:rgba(255,255,255,.5);line-height:1.75;max-width:280px}
+.footer-col-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:rgba(255,255,255,.3);margin-bottom:14px}
+.footer-col a{display:block;font-size:13.5px;color:rgba(255,255,255,.55);margin-bottom:9px;transition:var(--transition)}
+.footer-col a:hover{color:var(--teal)}
+.footer-bottom{max-width:1180px;margin:0 auto;padding:20px 24px 0;border-top:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.footer-copy{font-size:12.5px;color:rgba(255,255,255,.3)}
+.footer-badges{display:flex;gap:10px}
+.footer-bdg{padding:3px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.1);font-size:11px;font-weight:700;color:rgba(255,255,255,.3)}
+
+/* ══════════════════════════════════════
+   PROMO + PAYMENT
+══════════════════════════════════════ */
+.promo-block{max-width:480px;margin:32px auto 0;text-align:center}
+.promo-row{display:flex;gap:8px;margin-top:8px}
+.promo-input{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius);background:var(--bg-card);color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:var(--transition)}
+.promo-input:focus{border-color:var(--blue)}
+.btn-promo{padding:10px 18px;border-radius:var(--radius);font-size:13px;font-weight:700;background:var(--blue);color:#fff;border:none;cursor:pointer;font-family:var(--font);transition:var(--transition)}
+.btn-promo:hover{background:var(--blue-dark)}
+.promo-msg{font-size:12px;font-weight:700;margin-top:6px;min-height:16px}
+.promo-ok{color:var(--green)}.promo-err{color:var(--red)}
+.payment-logos{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:24px}
+.pm-logo{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border);font-size:13px;font-weight:700;color:var(--text-mid)}
+
+/* ══════════════════════════════════════
+   TOAST + MISC
+══════════════════════════════════════ */
+#toast{position:fixed;bottom:24px;right:24px;z-index:9999;background:var(--navy);color:#fff;padding:12px 18px;border-radius:var(--radius);font-size:14px;font-weight:600;box-shadow:0 8px 28px rgba(0,0,0,.25);opacity:0;transform:translateY(10px);transition:all .28s ease;pointer-events:none;max-width:300px;border-left:3px solid var(--blue)}
+.scroll-top{position:fixed;bottom:24px;left:24px;z-index:999;width:42px;height:42px;border-radius:50%;background:var(--blue);color:#fff;border:none;cursor:pointer;font-size:18px;box-shadow:var(--shadow-blue);transition:var(--transition);opacity:0;pointer-events:none}
+.scroll-top.show{opacity:1;pointer-events:auto}
+.scroll-top:hover{transform:translateY(-3px)}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+.animate{animation:fadeInUp .6s ease forwards;opacity:0}
+.d1{animation-delay:.08s}.d2{animation-delay:.16s}.d3{animation-delay:.24s}.d4{animation-delay:.32s}.d5{animation-delay:.4s}
+</style>
+</head>
+<body>
+
+<!-- ══════════ NAVBAR ══════════ -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
+      </div>
+      <div class="logo-text">EMLE <span>QBank</span></div>
+    </a>
+
+    <div class="nav-links" id="navLinks">
+      <a href="index.html" class="active">Home</a>
+      <a href="qbank.html">QBank</a>
+      <a href="ai-generator.html">AI Generator</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="dashboard.html" id="dashLink" style="display:none">Dashboard</a>
+    </div>
+
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
+      <div id="navAuthArea">
+        <a href="login.html" class="btn btn-ghost" style="background:var(--blue-soft);color:var(--blue);font-size:14px;padding:8px 16px">Log in</a>
+        <a href="register.html" class="btn btn-primary" style="font-size:14px;padding:8px 18px">Start Free Trial</a>
+      </div>
+      <button class="hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')">☰</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════ HERO ══════════ -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content container" style="max-width:1180px">
+
+    <div class="hero-left">
+      <div class="hero-eyebrow animate d1">
+        <div class="hero-eyebrow-dot"></div>
+        Egypt's #1 EMLE Preparation Platform
+      </div>
+
+      <h1 class="h1 hero-title animate d2">
+        Pass the <em>EMLE</em><br>on Your First Try
+      </h1>
+
+      <p class="hero-tagline animate d3">"Master the exam, not just the content."</p>
+
+      <p class="hero-desc animate d3">
+        4,000+ high-yield clinical vignette questions, AI-powered question generation, spaced-repetition flashcards, and analytics that reveal exactly where you need to focus.
+      </p>
+
+      <div class="hero-cta animate d4">
+        <a href="register.html" class="btn btn-primary btn-xl">🚀 Start Free – 7 Days</a>
+        <a href="qbank.html" class="btn btn-outline btn-xl">▶ Try a Free Exam</a>
+      </div>
+
+      <div class="hero-stats animate d5">
+        <div>
+          <div class="hstat-num"><span>4,000</span>+</div>
+          <div class="hstat-label">EMLE Questions</div>
+        </div>
+        <div class="hstat-divider"></div>
+        <div>
+          <div class="hstat-num"><span>92</span>%</div>
+          <div class="hstat-label">Pass Rate</div>
+        </div>
+        <div class="hstat-divider"></div>
+        <div>
+          <div class="hstat-num"><span>12K</span>+</div>
+          <div class="hstat-label">Doctors Enrolled</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MOCKUP -->
+    <div class="hero-visual">
+      <div class="float-card top-left">
+        <div class="fc-icon">🧠</div>
+        <div><div class="fc-lbl">AI Pass Prediction</div><div class="fc-val" style="color:var(--green)">Very High ✓</div></div>
+      </div>
+
+      <div class="mockup-card">
+        <div class="mockup-topbar">
+          <div class="mockup-brand">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
+            EMLE QBank
+          </div>
+          <div class="mockup-timer" id="heroTimer">02:43:08</div>
+        </div>
+        <div class="mockup-body">
+          <div class="mockup-qmeta">
+            <span class="mockup-badge">Internal Medicine</span>
+            <span class="mockup-badge surg" style="background:rgba(139,92,246,.1);color:#7C3AED">Pulmonology</span>
+            <span class="mkq-num">Q 37 / 100</span>
+          </div>
+          <div class="mockup-q">A 55-year-old man presents with sudden-onset dyspnea and right pleuritic chest pain. He returned from a long-haul flight 3 days ago. SpO₂ is 91%, HR 112 bpm, BP 98/68 mmHg. D-dimer is markedly elevated. CXR is unremarkable.</div>
+          <div class="mockup-opts">
+            <div class="mockup-opt wrong"><div class="opt-lt">A</div>Start IV antibiotics immediately</div>
+            <div class="mockup-opt correct"><div class="opt-lt">B</div>Start heparin + CT pulmonary angiography ✓</div>
+            <div class="mockup-opt"><div class="opt-lt">C</div>Immediate thrombolysis with tPA</div>
+            <div class="mockup-opt"><div class="opt-lt">D</div>Bedside echocardiography and wait</div>
+            <div class="mockup-opt"><div class="opt-lt">E</div>Oral aspirin and observation</div>
+          </div>
+          <div class="mockup-exp">
+            <div class="mockup-exp-lbl">💡 Tutor Mode – Explanation</div>
+            <div class="mockup-exp-txt">DVT + sudden dyspnea + long flight = classic PE. Patient is hemodynamically borderline → start anticoagulation immediately, confirm with CTPA (Gold Standard).</div>
+          </div>
+        </div>
+        <div class="mockup-foot">
+          <div class="mockup-prog-lbl">37%</div>
+          <div class="mockup-prog-bar"><div class="mockup-prog-fill"></div></div>
+        </div>
+      </div>
+
+      <div class="float-card bot-right">
+        <div class="fc-icon">📈</div>
+        <div><div class="fc-lbl">Internal Medicine Mastery</div><div class="fc-val" style="color:var(--blue)">⭐⭐⭐⭐☆ 4.2</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div class="trust-bar">
+  <div class="trust-inner">
+    <div class="trust-lbl">Trusted by graduates of</div>
+    <div class="trust-sep"></div>
+    <div class="trust-logos">
+      <div class="trust-logo">🏥 Kasr Al-Ainy</div>
+      <div class="trust-logo">🏥 Ain Shams</div>
+      <div class="trust-logo">🏥 Alexandria</div>
+      <div class="trust-logo">🏥 Assiut</div>
+      <div class="trust-logo">🏥 Mansoura</div>
+      <div class="trust-logo">🏥 Zagazig</div>
+      <div class="trust-logo">🏥 Tanta</div>
+      <div class="trust-logo">🏥 Banha</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ FEATURES ══════════ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <span class="label-sm">Platform Features</span>
+      <h2 class="h2">Everything You Need to Pass EMLE</h2>
+      <p class="body-lg" style="max-width:560px;margin:12px auto 0">From question banks to AI generation, flashcards, and performance analytics — all in one place.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon" style="background:rgba(0,87,255,.08)">📚</div>
+        <div class="feat-title">Question Bank (QBank)</div>
+        <div class="feat-desc">4,000+ EMLE-level clinical vignettes across all major subjects, with detailed explanations, images, ECGs, and X-rays.</div>
+        <a href="qbank.html" class="feat-link">Start practicing →</a>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon" style="background:rgba(0,201,167,.08)">🎓</div>
+        <div class="feat-title">Tutor & Timed Modes</div>
+        <div class="feat-desc">Tutor Mode shows instant explanations after each answer. Timed Mode simulates the real 100-question, 3-hour EMLE exam.</div>
+        <a href="qbank.html" class="feat-link">Try both modes →</a>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon" style="background:rgba(245,158,11,.08)">🤖</div>
+        <div class="feat-title">AI Question Generator</div>
+        <div class="feat-desc">Upload your own PDF notes or images — our AI creates custom EMLE-level questions targeting your exact weak areas.</div>
+        <a href="ai-generator.html" class="feat-link">Generate now →</a>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon" style="background:rgba(16,185,129,.08)">🃏</div>
+        <div class="feat-title">Smart Flashcards</div>
+        <div class="feat-desc">Anki-style spaced repetition with 2,000+ expert-made ReadyDecks. Create your own cards or let AI generate them for you.</div>
+        <span class="badge badge-green" style="margin-top:12px;font-size:11px">Spaced Repetition</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon" style="background:rgba(239,68,68,.08)">📊</div>
+        <div class="feat-title">Performance Analytics</div>
+        <div class="feat-desc">Heatmaps, subject mastery levels (1-5 stars), national average comparison, and AI-predicted EMLE score & pass probability.</div>
+        <span class="badge badge-teal" style="margin-top:12px;font-size:11px">AI Predictions</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon" style="background:rgba(139,92,246,.08)">📝</div>
+        <div class="feat-title">Realistic Mock Exams</div>
+        <div class="feat-desc">Up to 3 full-length EMLE simulations — exact subject distribution, 100 questions, 3-hour timer — with predicted score and pass likelihood.</div>
+        <span class="badge" style="background:rgba(139,92,246,.1);color:#7C3AED;margin-top:12px;font-size:11px">EMLE-Realistic</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ STATS ══════════ -->
+<section class="stats-band">
+  <div class="stats-inner">
+    <div><div class="stat-val">4,<em>000</em>+</div><div class="stat-lbl">EMLE-Level Questions</div></div>
+    <div><div class="stat-val"><em>92</em>%</div><div class="stat-lbl">User Pass Rate</div></div>
+    <div><div class="stat-val">12,<em>000</em>+</div><div class="stat-lbl">Enrolled Doctors</div></div>
+    <div><div class="stat-val">4.<em>9</em>★</div><div class="stat-lbl">Average Rating</div></div>
+  </div>
+</section>
+
+<!-- ══════════ HOW IT WORKS ══════════ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <span class="label-sm">How It Works</span>
+      <h2 class="h2">Four Steps to EMLE Success</h2>
+    </div>
+    <div class="hiw-steps">
+      <div class="hiw-step">
+        <div class="hiw-circle"><div class="hiw-num">1</div></div>
+        <div class="hiw-title">Register & Start Free</div>
+        <div class="hiw-desc">7-day free trial with 100 questions and 10 AI generations. No credit card required.</div>
+      </div>
+      <div class="hiw-step">
+        <div class="hiw-circle"><div class="hiw-num">2</div></div>
+        <div class="hiw-title">Take a Diagnostic Quiz</div>
+        <div class="hiw-desc">AI identifies your weak areas and builds a personalized study plan automatically.</div>
+      </div>
+      <div class="hiw-step">
+        <div class="hiw-circle"><div class="hiw-num">3</div></div>
+        <div class="hiw-title">Study Smart</div>
+        <div class="hiw-desc">QBank + explanations + SmartCards + Medical Library — fully integrated for maximum retention.</div>
+      </div>
+      <div class="hiw-step">
+        <div class="hiw-circle"><div class="hiw-num">4</div></div>
+        <div class="hiw-title">Simulate & Track Progress</div>
+        <div class="hiw-desc">Take full EMLE mock exams and see your predicted score before the real exam day.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ SUBJECT COVERAGE ══════════ -->
+<section class="section" style="padding-top:0">
+  <div class="container">
+    <div class="section-header">
+      <span class="label-sm">Subject Coverage</span>
+      <h2 class="h2">Full EMLE Curriculum Coverage</h2>
+      <p class="body-md" style="max-width:520px;margin:10px auto 0">Distributed exactly as the official EMLE exam specifications.</p>
+    </div>
+    <div class="subjects-grid">
+      <div class="subj-card">
+        <div class="subj-icon" style="background:rgba(239,68,68,.08)">❤️</div>
+        <div style="flex:1">
+          <div class="subj-name">Internal Medicine</div>
+          <div class="subj-meta">1,200+ questions</div>
+          <div class="subj-bar"><div class="subj-fill" style="width:85%;background:#EF4444"></div></div>
+          <div class="subj-pct">25–30% of EMLE</div>
+        </div>
+      </div>
+      <div class="subj-card">
+        <div class="subj-icon" style="background:rgba(59,130,246,.08)">🔬</div>
+        <div style="flex:1">
+          <div class="subj-name">General Surgery</div>
+          <div class="subj-meta">1,000+ questions</div>
+          <div class="subj-bar"><div class="subj-fill" style="width:75%;background:#3B82F6"></div></div>
+          <div class="subj-pct">20–30% of EMLE</div>
+        </div>
+      </div>
+      <div class="subj-card">
+        <div class="subj-icon" style="background:rgba(16,185,129,.08)">👶</div>
+        <div style="flex:1">
+          <div class="subj-name">Pediatrics</div>
+          <div class="subj-meta">800+ questions</div>
+          <div class="subj-bar"><div class="subj-fill" style="width:65%;background:#10B981"></div></div>
+          <div class="subj-pct">15–25% of EMLE</div>
+        </div>
+      </div>
+      <div class="subj-card">
+        <div class="subj-icon" style="background:rgba(168,85,247,.08)">🤰</div>
+        <div style="flex:1">
+          <div class="subj-name">Obstetrics & Gynecology</div>
+          <div class="subj-meta">750+ questions</div>
+          <div class="subj-bar"><div class="subj-fill" style="width:60%;background:#A855F7"></div></div>
+          <div class="subj-pct">15–25% of EMLE</div>
+        </div>
+      </div>
+      <div class="subj-card">
+        <div class="subj-icon" style="background:rgba(245,158,11,.08)">🚑</div>
+        <div style="flex:1">
+          <div class="subj-name">Emergency Medicine</div>
+          <div class="subj-meta">300+ questions</div>
+          <div class="subj-bar"><div class="subj-fill" style="width:42%;background:#F59E0B"></div></div>
+          <div class="subj-pct">Integrated topics</div>
+        </div>
+      </div>
+      <div class="subj-card">
+        <div class="subj-icon" style="background:rgba(100,116,139,.08)">🧪</div>
+        <div style="flex:1">
+          <div class="subj-name">Psychiatry + Public Health + Basic Sciences</div>
+          <div class="subj-meta">400+ questions</div>
+          <div class="subj-bar"><div class="subj-fill" style="width:45%;background:#64748B"></div></div>
+          <div class="subj-pct">Integrated topics</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ PRICING ══════════ -->
+<section class="pricing-section" id="pricing">
+  <div class="container">
+    <div class="section-header">
+      <span class="label-sm">Pricing</span>
+      <h2 class="h2">Choose Your Plan</h2>
+      <p class="body-md" style="max-width:520px;margin:10px auto 0">All plans include a 7-day free trial. No credit card required to start. Prices in Egyptian Pounds (EGP).</p>
+    </div>
+
+    <div class="plans-grid">
+      <!-- 30 day -->
+      <div class="plan-card">
+        <div class="plan-dur">30 Days</div>
+        <div class="plan-price"><span class="plan-curr">EGP </span>499</div>
+        <div class="plan-mo">One month</div>
+        <div class="ai-pill">🤖 50 AI Generations</div>
+        <div class="plan-sep"></div>
+        <div class="plan-feats">
+          <div class="pf"><span class="pf-ok">✓</span>Full QBank (4,000+ Qs)</div>
+          <div class="pf"><span class="pf-ok">✓</span>ReadyDecks (2,000+ cards)</div>
+          <div class="pf"><span class="pf-ok">✓</span>SmartCards</div>
+          <div class="pf"><span class="pf-ok">✓</span>Medical Library</div>
+          <div class="pf"><span class="pf-ok">✓</span>Performance Analytics</div>
+          <div class="pf"><span class="pf-no">✗</span><span style="opacity:.5">Mock Exams</span></div>
+          <div class="pf"><span class="pf-no">✗</span><span style="opacity:.5">Smart Study Plan</span></div>
+        </div>
+        <button class="btn-plan btn-plan-blue" onclick="goToCart({id:0,name:'30-Day Plan',price:499,days:30,ai:50})">Subscribe Now</button>
+        <div class="plan-footnote">7-day free trial included</div>
+      </div>
+
+      <!-- 90 day POPULAR -->
+      <div class="plan-card popular">
+        <div class="popular-ribbon">⭐ Most Popular</div>
+        <div class="plan-dur">90 Days</div>
+        <div class="plan-price"><span class="plan-curr">EGP </span>999</div>
+        <div class="plan-mo">3 months</div>
+        <div class="ai-pill">🤖 150 AI Generations</div>
+        <div class="plan-sep"></div>
+        <div class="plan-feats">
+          <div class="pf"><span class="pf-ok">✓</span>Full QBank (4,000+ Qs)</div>
+          <div class="pf"><span class="pf-ok">✓</span>ReadyDecks (2,000+ cards)</div>
+          <div class="pf"><span class="pf-ok">✓</span>SmartCards + AI Coach</div>
+          <div class="pf"><span class="pf-ok">✓</span>Medical Library</div>
+          <div class="pf"><span class="pf-ok">✓</span>Performance Analytics</div>
+          <div class="pf"><span class="pf-ok">✓</span>1 Full Mock Exam</div>
+          <div class="pf"><span class="pf-ok">✓</span>AI Study Coach</div>
+        </div>
+        <button class="btn-plan btn-plan-white" onclick="goToCart({id:1,name:'90-Day Plan',price:999,days:90,ai:150})">Subscribe Now</button>
+        <div class="plan-footnote">7-day free trial included</div>
+      </div>
+
+      <!-- 180 day -->
+      <div class="plan-card">
+        <div class="plan-dur">180 Days</div>
+        <div class="plan-price"><span class="plan-curr">EGP </span>1,499</div>
+        <div class="plan-mo">6 months</div>
+        <div class="ai-pill">🤖 300 AI Generations</div>
+        <div class="plan-sep"></div>
+        <div class="plan-feats">
+          <div class="pf"><span class="pf-ok">✓</span>Full QBank (4,000+ Qs)</div>
+          <div class="pf"><span class="pf-ok">✓</span>ReadyDecks (2,000+ cards)</div>
+          <div class="pf"><span class="pf-ok">✓</span>SmartCards + AI Coach</div>
+          <div class="pf"><span class="pf-ok">✓</span>Medical Library</div>
+          <div class="pf"><span class="pf-ok">✓</span>Performance Analytics</div>
+          <div class="pf"><span class="pf-ok">✓</span>2 Full Mock Exams</div>
+          <div class="pf"><span class="pf-ok">✓</span>Smart Study Planner</div>
+        </div>
+        <button class="btn-plan btn-plan-blue" onclick="goToCart({id:2,name:'180-Day Plan',price:1499,days:180,ai:300})">Subscribe Now</button>
+        <div class="plan-footnote">7-day free trial included</div>
+      </div>
+
+      <!-- 360 day -->
+      <div class="plan-card">
+        <div class="plan-dur">360 Days</div>
+        <div class="plan-price"><span class="plan-curr">EGP </span>2,299</div>
+        <div class="plan-mo">Full year</div>
+        <div class="ai-pill">🤖 Unlimited AI ♾️</div>
+        <div class="plan-sep"></div>
+        <div class="plan-feats">
+          <div class="pf"><span class="pf-ok">✓</span>Full QBank (4,000+ Qs)</div>
+          <div class="pf"><span class="pf-ok">✓</span>ReadyDecks (2,000+ cards)</div>
+          <div class="pf"><span class="pf-ok">✓</span>Unlimited AI Coach ♾️</div>
+          <div class="pf"><span class="pf-ok">✓</span>Medical Library</div>
+          <div class="pf"><span class="pf-ok">✓</span>Advanced Analytics</div>
+          <div class="pf"><span class="pf-ok">✓</span>3 Full Mock Exams</div>
+          <div class="pf"><span class="pf-ok">✓</span>Everything included</div>
+        </div>
+        <button class="btn-plan btn-plan-blue" onclick="goToCart({id:3,name:'360-Day Plan',price:2299,days:360,ai:'∞'})">Subscribe Now</button>
+        <div class="plan-footnote">7-day free trial included</div>
+      </div>
+    </div>
+
+    <!-- Promo -->
+    <div class="promo-block">
+      <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:4px">🏷️ Have a promo code?</div>
+      <div class="promo-row">
+        <input type="text" class="promo-input" id="promoInput" placeholder="Enter promo code" />
+        <button class="btn-promo" onclick="applyPromo()">Apply</button>
+      </div>
+      <div class="promo-msg" id="promoMsg"></div>
+    </div>
+
+    <!-- Payment methods -->
+    <div style="text-align:center;margin-top:28px">
+      <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">Accepted Payment Methods</div>
+      <div class="payment-logos">
+        <div class="pm-logo">💳 Visa / Mastercard</div>
+        <div class="pm-logo">🏧 Fawry</div>
+        <div class="pm-logo">📱 Vodafone Cash</div>
+        <div class="pm-logo">🏦 InstaPay</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ TESTIMONIALS ══════════ -->
+<section class="section" style="background:var(--bg)">
+  <div class="container">
+    <div class="section-header">
+      <span class="label-sm">Success Stories</span>
+      <h2 class="h2">Doctors Who Passed EMLE With Us</h2>
+    </div>
+    <div class="test-grid">
+      <div class="test-card">
+        <div class="test-stars">★★★★★</div>
+        <p class="test-quote">"The platform completely changed how I study. Clinical vignettes forced me to think, not just memorize. Passed EMLE on my first attempt!"</p>
+        <div class="test-author">
+          <div class="test-av" style="background:linear-gradient(135deg,#0057FF,#00C9A7)">M</div>
+          <div>
+            <div class="test-name">Dr. Mohamed Hassan</div>
+            <div class="test-role">Kasr Al-Ainy Graduate · 2024</div>
+            <div class="test-pass-badge">✓ Passed on first attempt</div>
+          </div>
+        </div>
+      </div>
+      <div class="test-card">
+        <div class="test-stars">★★★★★</div>
+        <p class="test-quote">"The spaced repetition flashcards are incredible. Two weeks of consistent SmartCards sessions and the material actually stuck. The AI Coach explains everything clearly."</p>
+        <div class="test-author">
+          <div class="test-av" style="background:linear-gradient(135deg,#A855F7,#EC4899)">S</div>
+          <div>
+            <div class="test-name">Dr. Sara Ibrahim</div>
+            <div class="test-role">Ain Shams Graduate · 2024</div>
+            <div class="test-pass-badge">✓ Excellent EMLE score</div>
+          </div>
+        </div>
+      </div>
+      <div class="test-card">
+        <div class="test-stars">★★★★★</div>
+        <p class="test-quote">"The analytics showed me exactly what to focus on in the final two weeks. The mock exams are so realistic that the actual EMLE felt familiar. Highly recommended!"</p>
+        <div class="test-author">
+          <div class="test-av" style="background:linear-gradient(135deg,#10B981,#059669)">A</div>
+          <div>
+            <div class="test-name">Dr. Ahmed Farouk</div>
+            <div class="test-role">Alexandria Graduate · 2024</div>
+            <div class="test-pass-badge">✓ "Very High" pass probability confirmed</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ CTA ══════════ -->
+<section class="cta-section">
+  <div class="cta-inner">
+    <div class="badge badge-teal" style="margin:0 auto 20px;width:fit-content">🎯 Free Trial · No Credit Card Required</div>
+    <h2 class="cta-title">Ready to Pass EMLE?</h2>
+    <p class="cta-sub">Join 12,000+ Egyptian doctors who are preparing smarter with EMLE QBank.</p>
+    <div class="cta-btns">
+      <a href="register.html" class="btn btn-white btn-xl">🚀 Start Your Free Trial</a>
+      <a href="qbank.html" class="btn btn-ghost btn-xl">📋 View All Plans</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div>
+      <div class="footer-brand-logo">
+        <div class="logo-mark"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="white" stroke-width="2.5"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg></div>
+        EMLE QBank
+      </div>
+      <p class="footer-desc">Egypt's most advanced preparation platform for the Egyptian Medical Licensing Examination. Built for Egyptian doctors, by Egyptian doctors.</p>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Platform</div>
+      <a href="qbank.html">QBank</a>
+      <a href="ai-generator.html">AI Generator</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="dashboard.html">Dashboard</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Resources</div>
+      <a href="#">Medical Library</a>
+      <a href="#">SmartCards</a>
+      <a href="#">Mock Exams</a>
+      <a href="#">Blog</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Support</div>
+      <a href="#">Help Center</a>
+      <a href="#">Contact Us</a>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Service</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2025 EMLE QBank. All rights reserved. Made with ❤️ in Egypt.</div>
+    <div class="footer-badges">
+      <div class="footer-bdg">SSL Secured 🔒</div>
+      <div class="footer-bdg">HIPAA</div>
+      <div class="footer-bdg">PCI DSS</div>
+    </div>
+  </div>
+</footer>
+
+<div id="toast"></div>
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+/* ── THEME ── */
+const savedTheme = localStorage.getItem('emle_theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+const themeBtn = document.getElementById('themeToggle');
+themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+themeBtn.addEventListener('click', () => {
+  const c = localStorage.getItem('emle_theme') || 'light';
+  const n = c === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('emle_theme', n);
+  document.documentElement.setAttribute('data-theme', n);
+  themeBtn.textContent = n === 'dark' ? '☀️' : '🌙';
+});
+
+/* ── AUTH ── */
+const user = JSON.parse(localStorage.getItem('emle_user') || 'null');
+if (user && user.loggedIn) {
+  document.getElementById('navAuthArea').innerHTML = `
+    <div class="nav-user-pill">
+      <div class="nav-avatar">${user.name[0]}</div>
+      Dr. ${user.name.split(' ')[0]}
+    </div>
+    <button class="btn" style="background:rgba(239,68,68,.1);color:var(--red);font-size:13px;padding:7px 14px;border:1px solid rgba(239,68,68,.2)" onclick="logout()">Log Out</button>`;
+  document.getElementById('dashLink').style.display = 'block';
+}
+function logout() { localStorage.removeItem('emle_user'); location.reload(); }
+
+/* ── HERO TIMER ── */
+let heroSecs = 9788;
+setInterval(() => {
+  heroSecs = Math.max(0, heroSecs - 1);
+  const h = Math.floor(heroSecs / 3600), m = Math.floor((heroSecs % 3600) / 60), s = heroSecs % 60;
+  const el = document.getElementById('heroTimer');
+  if (el) el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}, 1000);
+
+/* ── COUNTER ANIM ── */
+let counted = false;
+new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting && !counted) {
+    counted = true;
+    document.querySelectorAll('.stat-val em').forEach(el => {
+      const raw = el.textContent.replace(/[^0-9.]/g,'');
+      const target = parseFloat(raw);
+      if (isNaN(target)) return;
+      let cur = 0; const step = target / 50;
+      const t = setInterval(() => {
+        cur = Math.min(cur + step, target);
+        el.textContent = Number.isInteger(target) ? Math.floor(cur).toLocaleString() : cur.toFixed(1);
+        if (cur >= target) clearInterval(t);
+      }, 30);
+    });
+  }
+}, { threshold: 0.4 }).observe(document.querySelector('.stats-band'));
+
+/* ── SCROLL ANIMATIONS ── */
+new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.style.opacity = '1';
+      e.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.1 }).observe = (el => {
+  // patch individual
+}); // simplified below:
+document.querySelectorAll('.feat-card,.subj-card,.test-card,.plan-card,.hiw-step').forEach((el, i) => {
+  el.style.cssText += 'opacity:0;transform:translateY(22px);transition:opacity .55s ease,transform .55s ease;transition-delay:' + (i % 3 * 0.08) + 's';
+  new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting) { el.style.opacity='1'; el.style.transform='translateY(0)'; }
+  }, { threshold: 0.1 }).observe(el);
+});
+
+/* ── SCROLL TOP BTN ── */
+window.addEventListener('scroll', () => {
+  document.getElementById('scrollTop').classList.toggle('show', window.scrollY > 400);
+  document.getElementById('navbar').style.boxShadow = window.scrollY > 20 ? '0 4px 20px rgba(0,0,0,.08)' : 'none';
+});
+
+/* ── ACTIVE NAV ── */
+document.querySelectorAll('section[id]').forEach(sec => {
+  new IntersectionObserver(([e]) => {
+    if (e.isIntersecting) {
+      document.querySelectorAll('.nav-links a').forEach(a => {
+        a.classList.toggle('active', a.getAttribute('href') === '#' + sec.id);
+      });
+    }
+  }, { threshold: 0.5 }).observe(sec);
+});
+
+/* ── PROMO ── */
+const PROMOS = { 'EMLE2025': 20, 'WELCOME': 10, 'DOCTOR': 15, 'SAVE30': 30 };
+function applyPromo() {
+  const code = document.getElementById('promoInput').value.trim().toUpperCase();
+  const msg = document.getElementById('promoMsg');
+  if (!code) { msg.textContent = '⚠️ Please enter a promo code'; msg.className = 'promo-msg promo-err'; return; }
+  if (PROMOS[code]) {
+    msg.textContent = `✅ Code applied! ${PROMOS[code]}% discount activated.`;
+    msg.className = 'promo-msg promo-ok';
+    showToast(`🎉 ${PROMOS[code]}% discount applied!`);
+  } else {
+    msg.textContent = '❌ Invalid or expired promo code.';
+    msg.className = 'promo-msg promo-err';
+  }
+}
+document.getElementById('promoInput').addEventListener('keydown', e => { if (e.key === 'Enter') applyPromo(); });
+
+/* ── CART / PRICING ── */
+function goToCart(plan) {
+  localStorage.setItem('emle_cart', JSON.stringify(plan));
+  showToast(`✅ "${plan.name}" added to cart!`);
+  setTimeout(() => window.location.href = 'pricing.html', 900);
+}
+
+/* ── TOAST ── */
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.style.opacity = '1'; el.style.transform = 'translateY(0)';
+  setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateY(10px)'; }, 3000);
+}
+</script>
+</body>
+</html>

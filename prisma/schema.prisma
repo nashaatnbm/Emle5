@@ -1,0 +1,266 @@
+// ============================================================
+// EMLE QBank — Prisma Schema
+// Database: PostgreSQL via Supabase
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─────────────────────────────────────────
+// USER
+// ─────────────────────────────────────────
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  passwordHash  String?
+  avatarUrl     String?
+  school        String?   // Medical school (Kasr Al-Ainy, Ain Shams, etc.)
+  graduationYear Int?
+
+  // Subscription
+  plan          Plan      @default(FREE)
+  planExpiresAt DateTime?
+  aiCredits     Int       @default(10)
+
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+
+  // Relations
+  answers       UserAnswer[]
+  sessions      ExamSession[]
+  subscriptions Subscription[]
+  savedQuestions SavedQuestion[]
+  flaggedQuestions FlaggedQuestion[]
+  aiGenerations AIGeneration[]
+
+  @@map("users")
+}
+
+// ─────────────────────────────────────────
+// QUESTION
+// ─────────────────────────────────────────
+model Question {
+  id          String   @id @default(cuid())
+
+  // Content
+  stem        String   @db.Text       // Clinical vignette
+  question    String   @db.Text       // The actual question
+  options     Json                    // String[] — 5 options A-E
+  correct     Int                     // 0-indexed correct answer
+  explanation String   @db.Text       // Detailed explanation
+  highYield   String?  @db.Text       // High-yield bullet points
+
+  // Classification
+  subject     Subject
+  topic       String                  // e.g. "Cardiology", "Pulmonology"
+  subtopic    String?                 // e.g. "Heart Failure", "MI"
+  difficulty  Difficulty @default(EMLE_LEVEL)
+  tags        String[]   @default([]) // Extra tags for filtering
+
+  // Metadata
+  source      String?                 // PDF source, e.g. "Harrison_Ch45"
+  pageRef     String?                 // Page reference in source
+  imageUrl    String?                 // Optional image (ECG, X-ray, etc.)
+  isActive    Boolean  @default(true)
+  isVerified  Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  answers     UserAnswer[]
+  savedBy     SavedQuestion[]
+  flaggedBy   FlaggedQuestion[]
+
+  @@index([subject])
+  @@index([topic])
+  @@index([difficulty])
+  @@index([isActive])
+  @@map("questions")
+}
+
+// ─────────────────────────────────────────
+// USER ANSWER (tracks every answer)
+// ─────────────────────────────────────────
+model UserAnswer {
+  id          String      @id @default(cuid())
+  userId      String
+  questionId  String
+  sessionId   String?     // Links to ExamSession if in a session
+
+  selected    Int         // 0-4 — which option user selected
+  isCorrect   Boolean
+  timeTaken   Int?        // seconds spent on this question
+  isMarked    Boolean     @default(false) // "marked for review"
+
+  createdAt   DateTime    @default(now())
+
+  // Relations
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question    Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  session     ExamSession? @relation(fields: [sessionId], references: [id])
+
+  @@unique([userId, questionId, sessionId]) // One answer per Q per session
+  @@index([userId])
+  @@index([questionId])
+  @@index([sessionId])
+  @@map("user_answers")
+}
+
+// ─────────────────────────────────────────
+// EXAM SESSION (tutor or timed)
+// ─────────────────────────────────────────
+model ExamSession {
+  id           String      @id @default(cuid())
+  userId       String
+  mode         SessionMode
+  subject      String      @default("all")
+  questionIds  String[]    // Ordered list of question IDs in this session
+  totalQs      Int
+
+  // Results (filled when completed)
+  correct      Int         @default(0)
+  score        Float?      // percentage
+  timeTaken    Int?        // total seconds
+  completed    Boolean     @default(false)
+  completedAt  DateTime?
+
+  createdAt    DateTime    @default(now())
+
+  // Relations
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers      UserAnswer[]
+
+  @@index([userId])
+  @@map("exam_sessions")
+}
+
+// ─────────────────────────────────────────
+// SUBSCRIPTION
+// ─────────────────────────────────────────
+model Subscription {
+  id          String           @id @default(cuid())
+  userId      String
+  plan        Plan
+  amountEGP   Int
+  paymentRef  String?
+  status      SubscriptionStatus @default(PENDING)
+  aiCredits   Int
+
+  startsAt    DateTime         @default(now())
+  expiresAt   DateTime
+
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  // Relations
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("subscriptions")
+}
+
+// ─────────────────────────────────────────
+// SAVED QUESTIONS (bookmarks)
+// ─────────────────────────────────────────
+model SavedQuestion {
+  id          String   @id @default(cuid())
+  userId      String
+  questionId  String
+  note        String?  @db.Text
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question    Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionId])
+  @@map("saved_questions")
+}
+
+// ─────────────────────────────────────────
+// FLAGGED QUESTIONS (report issues)
+// ─────────────────────────────────────────
+model FlaggedQuestion {
+  id          String   @id @default(cuid())
+  userId      String
+  questionId  String
+  reason      String
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question    Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionId])
+  @@map("flagged_questions")
+}
+
+// ─────────────────────────────────────────
+// AI GENERATIONS
+// ─────────────────────────────────────────
+model AIGeneration {
+  id           String   @id @default(cuid())
+  userId       String
+  subject      String
+  topic        String?
+  count        Int
+  questionsJson Json    // Generated questions saved here
+  creditsUsed  Int
+
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("ai_generations")
+}
+
+// ─────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────
+enum Subject {
+  INTERNAL_MEDICINE   @map("im")
+  GENERAL_SURGERY     @map("surg")
+  PEDIATRICS          @map("peds")
+  OBSTETRICS_GYNECOLOGY @map("obg")
+  EMERGENCY_MEDICINE  @map("em")
+  PSYCHIATRY          @map("psych")
+  PUBLIC_HEALTH       @map("ph")
+  BASIC_SCIENCES      @map("basic")
+}
+
+enum Difficulty {
+  EASY        @map("easy")
+  MEDIUM      @map("medium")
+  EMLE_LEVEL  @map("emle")
+  HARD        @map("hard")
+}
+
+enum Plan {
+  FREE        @map("free")
+  PLAN_30D    @map("30d")
+  PLAN_90D    @map("90d")
+  PLAN_180D   @map("180d")
+  PLAN_360D   @map("360d")
+}
+
+enum SessionMode {
+  TUTOR   @map("tutor")
+  TIMED   @map("timed")
+}
+
+enum SubscriptionStatus {
+  PENDING  @map("pending")
+  ACTIVE   @map("active")
+  EXPIRED  @map("expired")
+  CANCELLED @map("cancelled")
+}

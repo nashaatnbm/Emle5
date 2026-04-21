@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QBank – EMLE QBank</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root{--blue:#0066CC;--blue-dark:#004A99;--blue-light:#00BFFF;--blue-glow:rgba(0,102,204,0.12);--green:#10B981;--red:#EF4444;--gold:#F5A623;--bg:#F0F4F8;--bg-card:#FFFFFF;--text:#1E2937;--text-mid:#4B5563;--text-muted:#9CA3AF;--border:#E2E8F0;--radius:8px;--font:'Tajawal','Cairo',sans-serif}
+    [data-theme="dark"]{--bg:#0D1117;--bg-card:#161B22;--text:#E6EDF3;--text-mid:#8B949E;--text-muted:#484F58;--border:#30363D}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;overflow:hidden}
+    body{font-family:var(--font);background:var(--bg);color:var(--text);direction:rtl;display:flex;flex-direction:column;transition:background .3s,color .3s}
+
+    /* ─── SETUP SCREEN ─── */
+    #setupScreen{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+    .setup-card{background:var(--bg-card);border-radius:16px;border:1px solid var(--border);padding:32px;max-width:580px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,0.08)}
+    .setup-logo{display:flex;align-items:center;justify-content:center;gap:9px;font-size:18px;font-weight:800;margin-bottom:24px;color:var(--text)}
+    .logo-icon{width:34px;height:34px;background:var(--blue);border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;font-weight:900;box-shadow:0 4px 10px rgba(0,102,204,0.35)}
+    .setup-logo strong{color:var(--blue)}
+    .setup-title{font-size:22px;font-weight:900;text-align:center;margin-bottom:4px}
+    .setup-sub{font-size:14px;color:var(--text-mid);text-align:center;margin-bottom:24px}
+    .mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+    .mode-opt{border:2px solid var(--border);border-radius:10px;padding:14px 12px;cursor:pointer;transition:all .2s;text-align:center}
+    .mode-opt:hover{border-color:var(--blue);background:var(--blue-glow)}
+    .mode-opt.sel{border-color:var(--blue);background:var(--blue-glow)}
+    .mode-icon{font-size:24px;margin-bottom:6px}
+    .mode-label{font-size:13px;font-weight:800;margin-bottom:2px}
+    .mode-desc{font-size:11px;color:var(--text-muted)}
+    .setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+    @media(max-width:480px){.setup-grid,.mode-grid{grid-template-columns:1fr}}
+    .sg label{font-size:12px;font-weight:700;color:var(--text-mid);margin-bottom:5px;display:block}
+    .sg select{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:all .2s}
+    .sg select:focus{border-color:var(--blue)}
+    .weak-toggle{display:flex;align-items:center;gap:10px;padding:12px;background:rgba(0,102,204,0.05);border-radius:var(--radius);margin-bottom:20px;border:1px solid rgba(0,102,204,0.12);cursor:pointer}
+    .weak-toggle input{width:16px;height:16px;cursor:pointer;accent-color:var(--blue)}
+    .weak-toggle-label{font-size:13px;font-weight:700}
+    .weak-toggle-sub{font-size:11px;color:var(--text-muted)}
+    .btn-start{width:100%;padding:14px;border-radius:var(--radius);font-size:16px;font-weight:800;background:var(--blue);color:#fff;border:none;cursor:pointer;font-family:var(--font);box-shadow:0 6px 18px rgba(0,102,204,0.35);transition:all .2s}
+    .btn-start:hover{background:var(--blue-dark);transform:translateY(-2px)}
+
+    /* ─── EXAM SCREEN ─── */
+    #examScreen{display:none;flex-direction:column;height:100vh}
+    #examScreen.active{display:flex}
+
+    /* TOP BAR */
+    .topbar{background:var(--bg-card);border-bottom:1px solid var(--border);height:54px;display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;z-index:100}
+    .tb-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+    .tb-center{display:flex;align-items:center;gap:8px;flex-shrink:0}
+    .tb-right{display:flex;align-items:center;gap:6px;justify-content:flex-end;flex:1;min-width:0}
+    .top-logo{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:800;text-decoration:none;color:var(--text);flex-shrink:0}
+    .top-logo strong{color:var(--blue)}
+    .tb-badge{padding:3px 10px;border-radius:100px;font-size:11px;font-weight:800}
+    .tb-badge.mode{background:rgba(0,102,204,0.1);color:var(--blue)}
+    .tb-badge.subj{background:rgba(16,185,129,0.1);color:var(--green)}
+    .timer-box{display:flex;align-items:center;gap:6px;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius);padding:5px 12px}
+    .timer-icon{font-size:13px}
+    #timerDisplay{font-size:16px;font-weight:900;letter-spacing:1px;font-family:'Cairo',monospace;color:var(--text)}
+    #timerDisplay.warn{color:var(--gold)}
+    #timerDisplay.danger{color:var(--red);animation:blink .8s step-start infinite}
+    @keyframes blink{50%{opacity:.4}}
+    .qcount{font-size:13px;font-weight:800;color:var(--text-mid);white-space:nowrap}
+    .tb-btn{padding:5px 11px;border-radius:var(--radius);font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font);border:1px solid var(--border);background:var(--bg);color:var(--text-mid);transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:4px}
+    .tb-btn:hover{border-color:var(--blue);color:var(--blue)}
+    .tb-btn.on{background:var(--blue-glow);border-color:var(--blue);color:var(--blue)}
+    .tb-btn.red{border-color:rgba(239,68,68,0.3);color:var(--red)}
+    .tb-btn.red:hover{background:rgba(239,68,68,0.06)}
+    @media(max-width:600px){.top-logo span,.tb-badge.subj,.qcount{display:none}}
+
+    /* BODY */
+    .exam-body{display:flex;flex:1;overflow:hidden}
+
+    /* QUESTION PANEL */
+    .q-panel{flex:1;overflow-y:auto;min-width:0}
+    .q-panel::-webkit-scrollbar{width:4px}
+    .q-panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
+    .q-area{max-width:800px;margin:0 auto;padding:24px 20px}
+
+    /* Q META */
+    .q-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+    .qm-badge{padding:3px 9px;border-radius:100px;font-size:11px;font-weight:700}
+    .qm-badge.im{background:rgba(239,68,68,0.08);color:#DC2626}
+    .qm-badge.surg{background:rgba(59,130,246,0.08);color:#2563EB}
+    .qm-badge.peds{background:rgba(16,185,129,0.08);color:#059669}
+    .qm-badge.obg{background:rgba(168,85,247,0.08);color:#7C3AED}
+    .qm-badge.em{background:rgba(245,166,35,0.08);color:#B45309}
+    .qm-badge.diff{background:rgba(0,0,0,0.05);color:var(--text-mid)}
+    [data-theme="dark"] .qm-badge.diff{background:rgba(255,255,255,0.07)}
+    .flag-btn{margin-right:auto;padding:3px 10px;border-radius:100px;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:11px;font-weight:700;color:var(--text-muted);transition:all .2s;display:flex;align-items:center;gap:4px;font-family:var(--font)}
+    .flag-btn:hover{border-color:var(--gold);color:var(--gold)}
+    .flag-btn.flagged{background:rgba(245,166,35,0.1);border-color:var(--gold);color:var(--gold)}
+
+    /* STEM */
+    .q-stem{font-size:15px;line-height:1.85;padding:18px 20px;background:var(--bg);border-radius:var(--radius);border-right:3px solid var(--blue);margin-bottom:16px}
+    [data-theme="dark"] .q-stem{background:rgba(255,255,255,0.04)}
+    .q-stem-lbl{font-size:10px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:1.2px;display:block;margin-bottom:8px}
+
+    /* QUESTION */
+    .q-question{font-size:14.5px;font-weight:700;padding:12px 14px;background:rgba(0,102,204,0.05);border-radius:var(--radius);border:1px solid rgba(0,102,204,0.12);margin-bottom:18px;line-height:1.65}
+
+    /* OPTIONS */
+    .options{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+    .opt{display:flex;align-items:flex-start;gap:11px;padding:13px 15px;border:2px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .18s;background:var(--bg-card)}
+    [data-theme="dark"] .opt{background:rgba(255,255,255,0.03)}
+    .opt:hover:not(.disabled){border-color:var(--blue);background:rgba(0,102,204,0.04);transform:translateX(-2px)}
+    .opt.sel{border-color:var(--blue);background:rgba(0,102,204,0.06)}
+    .opt.correct{border-color:var(--green)!important;background:rgba(16,185,129,0.07)!important}
+    .opt.wrong{border-color:var(--red)!important;background:rgba(239,68,68,0.06)!important}
+    .opt.correct-missed{border-color:var(--green)!important;background:rgba(16,185,129,0.04)!important;border-style:dashed!important}
+    .opt.strike{opacity:.45;text-decoration:line-through}
+    .opt.disabled{cursor:default;pointer-events:none}
+    .opt-letter{width:30px;height:30px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0;background:var(--bg);transition:all .18s}
+    .opt.sel .opt-letter{background:var(--blue);border-color:var(--blue);color:#fff}
+    .opt.correct .opt-letter{background:var(--green);border-color:var(--green);color:#fff}
+    .opt.wrong .opt-letter{background:var(--red);border-color:var(--red);color:#fff}
+    .opt.correct-missed .opt-letter{background:rgba(16,185,129,0.6);border-color:var(--green);color:#fff}
+    .opt-text{font-size:13.5px;line-height:1.65;padding-top:4px;color:var(--text-mid)}
+    .opt.sel .opt-text,.opt.correct .opt-text,.opt.wrong .opt-text{color:var(--text)}
+    .opt-result{margin-right:auto;font-size:16px;flex-shrink:0}
+
+    /* EXPLANATION */
+    .explanation{display:none;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:8px}
+    .explanation.show{display:block;animation:fadeIn .4s ease}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .exp-header{background:rgba(0,102,204,0.07);padding:13px 17px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+    [data-theme="dark"] .exp-header{background:rgba(0,102,204,0.15)}
+    .exp-title{font-size:13px;font-weight:800;color:var(--blue)}
+    .exp-body{padding:18px}
+    .exp-sec{margin-bottom:14px}
+    .exp-sec:last-child{margin-bottom:0}
+    .exp-sec-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:7px}
+    .exp-sec-text{font-size:13.5px;color:var(--text-mid);line-height:1.85}
+    .exp-sec-text strong{color:var(--text);font-weight:800}
+    .hy-box{background:rgba(245,166,35,0.07);border:1px solid rgba(245,166,35,0.2);border-radius:var(--radius);padding:12px 14px;margin-top:12px}
+    .hy-title{font-size:10px;font-weight:800;color:var(--gold);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
+    .hy-text{font-size:13px;color:var(--text-mid);line-height:1.8}
+    .ai-coach{background:linear-gradient(135deg,#0F172A,#1E293B);border-radius:var(--radius);padding:14px;margin-top:12px;display:flex;align-items:flex-start;gap:10px}
+    .ai-coach-icon{font-size:20px;flex-shrink:0}
+    .ai-coach-text{font-size:13px;color:rgba(255,255,255,0.8);line-height:1.7}
+    .ai-coach-title{font-size:11px;font-weight:800;color:var(--blue-light);margin-bottom:4px}
+
+    /* BOTTOM BAR */
+    .bottombar{background:var(--bg-card);border-top:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:8px;flex-shrink:0}
+    .bb-left{display:flex;gap:6px}
+    .bb-center{flex:1;display:flex;align-items:center;justify-content:center;gap:8px}
+    .bb-right{display:flex;gap:6px}
+    .tool-btn{width:34px;height:34px;border-radius:var(--radius);border:1.5px solid var(--border);background:var(--bg-card);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:all .2s;color:var(--text-muted)}
+    .tool-btn:hover{border-color:var(--blue);color:var(--blue)}
+    .tool-btn.flagged{background:rgba(245,166,35,0.1);border-color:var(--gold);color:var(--gold)}
+    .tool-btn.striking{background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.3);color:var(--red)}
+    .nav-btn{padding:9px 18px;border-radius:var(--radius);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);border:1.5px solid var(--border);background:var(--bg-card);color:var(--text-mid);transition:all .2s;display:flex;align-items:center;gap:5px;white-space:nowrap}
+    .nav-btn:hover:not(:disabled){border-color:var(--blue);color:var(--blue)}
+    .nav-btn:disabled{opacity:.35;cursor:not-allowed}
+    .nav-btn.primary{background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:0 4px 12px rgba(0,102,204,0.3)}
+    .nav-btn.primary:hover{background:var(--blue-dark)}
+    .nav-btn.success{background:var(--green);color:#fff;border-color:var(--green)}
+    @media(max-width:500px){.nav-btn{padding:8px 12px;font-size:12px}.bb-right{display:none}}
+
+    /* SIDEBAR */
+    .sidebar{width:268px;flex-shrink:0;background:var(--bg-card);border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column;transition:width .28s ease,opacity .28s ease}
+    .sidebar.collapsed{width:0;opacity:0;overflow:hidden}
+    .sidebar::-webkit-scrollbar{width:4px}
+    .sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
+    .sb-header{padding:14px 14px 10px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg-card);z-index:5}
+    .sb-title{font-size:13px;font-weight:800;margin-bottom:2px}
+    .sb-sub{font-size:11px;color:var(--text-muted);margin-bottom:8px}
+    .sb-prog-bar{height:4px;background:var(--border);border-radius:100px;overflow:hidden}
+    .sb-prog-fill{height:100%;background:var(--blue);border-radius:100px;transition:width .5s ease}
+    .sb-prog-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);font-weight:700;margin-top:4px}
+    .q-grid{padding:10px;display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+    .qn-btn{width:100%;aspect-ratio:1;border-radius:6px;border:1.5px solid var(--border);background:var(--bg);cursor:pointer;font-size:11px;font-weight:700;color:var(--text-muted);transition:all .18s;position:relative;display:flex;align-items:center;justify-content:center}
+    .qn-btn:hover{border-color:var(--blue);color:var(--blue)}
+    .qn-btn.cur{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 2px 8px rgba(0,102,204,0.3)}
+    .qn-btn.ans-right{background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.4);color:var(--green)}
+    .qn-btn.ans-wrong{background:rgba(239,68,68,0.07);border-color:rgba(239,68,68,0.25);color:var(--red)}
+    .qn-btn.flag-mark::after{content:'🚩';position:absolute;top:-3px;right:-3px;font-size:7px}
+    .sb-legend{padding:10px 14px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px}
+    .leg-item{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text-muted)}
+    .leg-dot{width:11px;height:11px;border-radius:3px;flex-shrink:0}
+
+    /* MODAL */
+    .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:900;align-items:center;justify-content:center}
+    .overlay.open{display:flex}
+    .modal{background:var(--bg-card);border-radius:16px;padding:28px;max-width:440px;width:90%;animation:popIn .28s ease}
+    @keyframes popIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+    .modal-icon{font-size:44px;text-align:center;margin-bottom:12px}
+    .modal-title{font-size:19px;font-weight:900;text-align:center;margin-bottom:7px}
+    .modal-sub{font-size:13.5px;color:var(--text-mid);text-align:center;line-height:1.7;margin-bottom:22px}
+    .modal-btns{display:flex;gap:10px}
+    .modal-btns button{flex:1;padding:11px;border-radius:var(--radius);font-size:13px;font-weight:800;cursor:pointer;font-family:var(--font);border:none;transition:all .2s}
+    .m-cancel{background:var(--bg);color:var(--text-mid);border:1.5px solid var(--border)!important}
+    .m-cancel:hover{border-color:var(--blue)!important;color:var(--blue)}
+    .m-confirm{background:var(--blue);color:#fff}
+    .m-confirm:hover{background:var(--blue-dark)}
+    .m-danger{background:var(--red);color:#fff}
+    .m-danger:hover{background:#DC2626}
+
+    /* RESULTS */
+    #resultsScreen{display:none;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:32px;text-align:center;overflow-y:auto}
+    #resultsScreen.show{display:flex;animation:fadeIn .5s ease}
+    .res-circle{width:140px;height:140px;border-radius:50%;background:linear-gradient(135deg,var(--blue),#0052A3);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;margin:0 auto 22px;box-shadow:0 12px 40px rgba(0,102,204,0.4)}
+    .res-num{font-size:44px;font-weight:900;line-height:1}
+    .res-denom{font-size:13px;opacity:.8}
+    .res-title{font-size:26px;font-weight:900;margin-bottom:8px}
+    .res-sub{font-size:14px;color:var(--text-mid);margin-bottom:24px}
+    .res-stats{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-bottom:24px}
+    .res-stat{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:12px 18px;text-align:center;min-width:90px}
+    .res-stat-n{font-size:22px;font-weight:900}
+    .res-stat-l{font-size:11px;color:var(--text-muted);margin-top:2px}
+    .res-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+    .rb{padding:11px 22px;border-radius:var(--radius);font-size:13px;font-weight:800;cursor:pointer;font-family:var(--font);border:none;transition:all .2s}
+    .rb-blue{background:var(--blue);color:#fff;box-shadow:0 4px 12px rgba(0,102,204,0.3)}
+    .rb-blue:hover{background:var(--blue-dark)}
+    .rb-ghost{background:var(--bg);color:var(--text-mid);border:1.5px solid var(--border)!important}
+    .rb-ghost:hover{border-color:var(--blue)!important;color:var(--blue)}
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════ SETUP SCREEN ══════════════════ -->
+<div id="setupScreen">
+  <div class="setup-card">
+    <div class="setup-logo">
+      <div class="logo-icon">E</div>
+      EMLE <strong>QBank</strong>
+    </div>
+    <div class="setup-title">⚙️ Exam Setup</div>
+    <div class="setup-sub">Customize your session before starting</div>
+
+    <div style="font-size:13px;font-weight:800;color:var(--text-mid);margin-bottom:10px">🎯 Exam Mode</div>
+    <div class="mode-grid">
+      <div class="mode-opt sel" id="mTimedBtn" onclick="selMode('timed',this)">
+        <div class="mode-icon">⏱</div>
+        <div class="mode-label">Timed Mode</div>
+        <div class="mode-desc">Real exam simulation with timer</div>
+      </div>
+      <div class="mode-opt" id="mTutorBtn" onclick="selMode('tutor',this)">
+        <div class="mode-icon">🎓</div>
+        <div class="mode-label">Tutor Mode</div>
+        <div class="mode-desc">Instant explanation after each answer</div>
+      </div>
+    </div>
+
+    <div class="setup-grid">
+      <div class="sg"><label>Subject</label>
+        <select id="sSubject">
+          <option value="all">All Subjects</option>
+          <option value="im">Internal Medicine</option>
+          <option value="surg">General Surgery</option>
+          <option value="peds">Pediatrics</option>
+          <option value="obg">OB/GYN</option>
+          <option value="em">Emergency Medicine</option>
+        </select>
+      </div>
+      <div class="sg"><label>Number of Questions</label>
+        <select id="sCount">
+          <option value="5">5 Questions (trial)</option>
+          <option value="10" selected>10 Questions</option>
+          <option value="15">15 Questions</option>
+          <option value="all">All Questions (15)</option>
+        </select>
+      </div>
+      <div class="sg"><label>Difficulty</label>
+        <select id="sDiff">
+          <option value="mixed">Mixed</option>
+          <option value="EMLE-Level">EMLE-Level</option>
+        </select>
+      </div>
+      <div class="sg"><label>Question Filter</label>
+        <select id="sFilter">
+          <option value="all">كل Question Filter</option>
+          <option value="unseen">Unanswered Only</option>
+          <option value="wrong">Previously Wrong</option>
+        </select>
+      </div>
+    </div>
+
+    <label class="weak-toggle">
+      <input type="checkbox" id="weakChk" />
+      <div>
+        <div class="weak-toggle-label">🎯 Target My Weak Areas</div>
+        <div class="weak-toggle-sub">AI will prioritize your weakest topics</div>
+      </div>
+    </label>
+
+    <button class="btn-start" onclick="startExam()">🚀 Start Exam Now</button>
+    <div style="text-align:center;margin-top:12px">
+      <a href="dashboard.html" style="font-size:13px;color:var(--text-muted)">← Back to Dashboard</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ EXAM SCREEN ══════════════════ -->
+<div id="examScreen">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="tb-left">
+      <a href="dashboard.html" class="top-logo"><div class="logo-icon" style="width:28px;height:28px;font-size:12px">E</div><span>EMLE <strong>QBank</strong></span></a>
+      <span class="tb-badge mode" id="modeBadge">Timed Mode</span>
+      <span class="tb-badge subj" id="subjectBadge">All Subjects</span>
+    </div>
+    <div class="tb-center">
+      <div class="timer-box">
+        <span class="timer-icon">⏱</span>
+        <span id="timerDisplay">03:00:00</span>
+      </div>
+    </div>
+    <div class="tb-right">
+      <span class="qcount" id="qCount">١ / ١٠</span>
+      <button class="tb-btn" id="tutorToggleBtn" onclick="toggleTutor()">🎓 Tutor: Off</button>
+      <button class="tb-btn" onclick="toggleTheme()">🌙</button>
+      <button class="tb-btn" onclick="toggleSidebar()">📋 Question Filter</button>
+      <button class="tb-btn red" onclick="openModal('endModal')">⏹ End</button>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="exam-body">
+
+    <!-- QUESTION PANEL -->
+    <div class="q-panel" id="qPanel">
+      <div class="q-area" id="qArea"><!-- filled by JS --></div>
+      <!-- RESULTS -->
+      <div id="resultsScreen">
+        <div class="res-circle"><div class="res-num" id="rScore">0</div><div class="res-denom">out of <span id="rTotal">10</span></div></div>
+        <h2 class="res-title" id="rTitle">Final Results</h2>
+        <p class="res-sub" id="rSub">أداء جيد! استمر في المذاكرة.</p>
+        <div class="res-stats">
+          <div class="res-stat"><div class="res-stat-n" style="color:var(--green)" id="rCorrect">0</div><div class="res-stat-l">Correct</div></div>
+          <div class="res-stat"><div class="res-stat-n" style="color:var(--red)" id="rWrong">0</div><div class="res-stat-l">Wrong</div></div>
+          <div class="res-stat"><div class="res-stat-n" id="rSkipped">0</div><div class="res-stat-l">Unanswered</div></div>
+          <div class="res-stat"><div class="res-stat-n" style="color:var(--gold)" id="rAccuracy">0%</div><div class="res-stat-l">الدقة</div></div>
+          <div class="res-stat"><div class="res-stat-n" id="rTime">--:--</div><div class="res-stat-l">الوقت</div></div>
+        </div>
+        <div class="res-btns">
+          <button class="rb rb-blue" onclick="location.reload()">🔄 New Exam</button>
+          <button class="rb rb-ghost" onclick="reviewExam()">📖 Review Answers</button>
+          <button class="rb rb-ghost" onclick="location.href='dashboard.html'">📊 Dashboard</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+      <div class="sb-header">
+        <div class="sb-title">📋 مستكشف Question Filter</div>
+        <div class="sb-sub">Click any number to jump to that question</div>
+        <div class="sb-prog-bar"><div class="sb-prog-fill" id="sbProgFill"></div></div>
+        <div class="sb-prog-labels"><span id="sbAnswered">0 answered</span><span id="sbTotal">0 total</span></div>
+      </div>
+      <div class="q-grid" id="qGrid"></div>
+      <div class="sb-legend">
+        <div class="leg-item"><div class="leg-dot" style="background:var(--blue)"></div>Current</div>
+        <div class="leg-item"><div class="leg-dot" style="background:rgba(16,185,129,0.4);border:1px solid rgba(16,185,129,0.5)"></div>Correct</div>
+        <div class="leg-item"><div class="leg-dot" style="background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.3)"></div>Wrong</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--bg);border:1.5px solid var(--border)"></div>Unanswered</div>
+        <div class="leg-item"><span style="font-size:10px">🚩</span>Flagged</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <div class="bottombar">
+    <div class="bb-left">
+      <button class="tool-btn" id="flagToolBtn" onclick="toggleFlag()" title="تحديد للمراجعة">🚩</button>
+      <button class="tool-btn" id="strikeToolBtn" onclick="toggleStrikeMode()" title="وضع الشطب">✂️</button>
+      <button class="tool-btn" onclick="showToast('Notes feature coming soon! 📝')" title="ملاحظة">📝</button>
+    </div>
+    <div class="bb-center">
+      <button class="nav-btn" id="prevBtn" onclick="go(-1)" disabled>← Prev</button>
+      <button class="nav-btn primary" id="checkBtn" onclick="checkAnswer()">✓ Confirm Answer</button>
+      <button class="nav-btn" id="nextBtn" onclick="go(1)">Next →</button>
+    </div>
+    <div class="bb-right">
+      <button class="nav-btn success" id="finishBtn" style="display:none" onclick="openModal('endModal')">🏁 Finish Exam</button>
+    </div>
+  </div>
+</div>
+
+<!-- END MODAL -->
+<div class="overlay" id="endModal">
+  <div class="modal">
+    <div class="modal-icon">⚠️</div>
+    <div class="modal-title">End the exam?</div>
+    <div class="modal-sub" id="endModalSub">Question Filter غير الansweredة ستُحسب Wrongة. هل أنت متأكد؟</div>
+    <div class="modal-btns">
+      <button class="m-cancel" onclick="closeModal('endModal')">Cancel</button>
+      <button class="m-danger" onclick="endExam()">Yes, End Exam</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" style="position:fixed;bottom:20px;right:20px;z-index:9999;background:#1E293B;color:#fff;padding:11px 16px;border-radius:var(--radius);font-size:13px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,0.3);opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;max-width:280px"></div>
+
+<script>
+/* ══════════════════════════════════
+   QUESTION BANK – 15 EMLE-Level Qs
+══════════════════════════════════ */
+const QBANK = [
+  {id:1,subject:'im',subjectLabel:'Internal Medicine',topic:'Pulmonology',diff:'EMLE-Level',
+   stem:'مريض ٥٥ سنة جاء بضيق تنفس مفاجئ وألم صدر حاد وتورم في الساق الشمالية من أسبوعين. رحلة طيران طويلة قبل ٣ أيام. نبض ١١٠، ضغط ١٠٠/٧٠، SpO₂ ٩١٪، D-dimer مرتفع. صورة الصدر طبيعية.',
+   question:'ما هو أفضل تدبير علاجي فوري؟',
+   options:['إعطاء مضاد حيوية IV','بدء Heparin IV مع CT Pulmonary Angiography فوراً','Thrombolysis بـ tPA مباشرة','Echocardiography والانتظار','إعطاء Aspirin ومراقبة المريض'],
+   correct:1,
+   exp:`<div class="exp-sec"><div class="exp-sec-title">التشخيص</div><div class="exp-sec-text">الصورة كلاسيكية لـ <strong>Pulmonary Embolism (PE)</strong>: DVT + ضيق تنفس مفاجئ + رحلة طيران + D-dimer مرتفع + Hypoxia → Wells Score عالي جداً.</div></div><div class="exp-sec"><div class="exp-sec-title">لماذا B صح؟</div><div class="exp-sec-text">المريض <strong>مستقر ديناميكياً</strong> (ضغط > ٩٠)، لذلك:<br>1. نبدأ <strong>Anticoagulation (Heparin IV) فوراً</strong> بدون انتظار CT<br>2. CT Pulmonary Angiography = Gold Standard للتأكيد</div></div><div class="hy-box"><div class="hy-title">⭐ High-Yield</div><div class="hy-text">• Thrombolysis = للـ PE المصحوب بـ Hemodynamic instability فقط (ضغط < ٩٠)<br>• DOAC بديل Heparin في الحالات المستقرة<br>• IVC Filter لو في contraindication للـ anticoagulation</div></div><div class="ai-coach"><div class="ai-coach-icon">🤖</div><div><div class="ai-coach-title">AI Coach يسألك:</div><div class="ai-coach-text">إيه الفرق بين Submassive PE و Massive PE وإيه تأثير ده على العلاج؟</div></div></div>`},
+
+  {id:2,subject:'surg',subjectLabel:'General Surgery',topic:'Acute Abdomen',diff:'EMLE-Level',
+   stem:'طفلة ٧ سنوات بألم بدأ حوالين السرة من ٨ ساعات وانتقل للربع الأيمن السفلي. حرارة ٣٨.٢، رفض أكل. McBurney\'s point tenderness +، Rebound +، WBC = ١٥,٠٠٠.',
+   question:'ما هو التدبير الأنسب؟',
+   options:['CT بطن وحوض مع contrast','Ultrasound بطن والانتظار','مضاد حيوية وإرسالها للبيت','Laparoscopic Appendectomy فوراً','مراقبة ٢٤ ساعة'],
+   correct:3,
+   exp:`<div class="exp-sec"><div class="exp-sec-title">التشخيص</div><div class="exp-sec-text"><strong>Acute Appendicitis</strong> كلاسيكي: انتقال الألم من السرة للـ RLQ + Anorexia + Fever + Leukocytosis + Peritoneal irritation signs. Alvarado Score = ٧.</div></div><div class="exp-sec"><div class="exp-sec-title">لماذا D صح؟</div><div class="exp-sec-text">التشخيص واضح سريرياً → <strong>Laparoscopic Appendectomy فوراً</strong>. في الأطفال: لا داعي لـ CT (radiation) لو التشخيص واضح. Ultrasound = أول imaging لو شك.</div></div><div class="hy-box"><div class="hy-title">⭐ High-Yield</div><div class="hy-text">• Rovsing's sign: ألم RLQ عند ضغط LLQ<br>• Psoas sign: ألم RLQ عند تمديد الفخذ الأيمن<br>• Obturator sign: ألم عند تدوير الفخذ الداخلي<br>• Perforation risk يرتفع بعد ٢٤-٧٢ ساعة</div></div><div class="ai-coach"><div class="ai-coach-icon">🤖</div><div><div class="ai-coach-title">AI Coach يسألك:</div><div class="ai-coach-text">إيه الفرق بين Appendicitis عند الحامل وعند الكبار في العمر؟ وليه التشخيص بيكون أصعب؟</div></div></div>`},
+
+  {id:3,subject:'peds',subjectLabel:'Pediatrics',topic:'Neonatology',diff:'EMLE-Level',
+   stem:'رضيع ٣ أيام بصفرا ظهرت في أول ٢٤ ساعة. Bilirubin الكلي = ١٨ mg/dL، غير المباشر = ١٦. أم فصيلتها O+، الطفل A+. Coombs إيجابي.',
+   question:'ما هو التدبير الفوري الأنسب؟',
+   options:['Phototherapy فوراً','Exchange Transfusion فوراً','مراجعة بعد ٦ ساعات','إعطاء الأم Rhogam','Oral Phenobarbital'],
+   correct:1,
+   exp:`<div class="exp-sec"><div class="exp-sec-title">التشخيص</div><div class="exp-sec-text"><strong>ABO Incompatibility → Hemolytic Disease of Newborn</strong>: صفرا < ٢٤ ساعة = Pathological. أم O + طفل A + Coombs+ = Hemolysis. Bilirubin ١٨ في يوم ٣ = خطر Kernicterus.</div></div><div class="exp-sec"><div class="exp-sec-title">لماذا B صح؟</div><div class="exp-sec-text">بناءً على Bhutani Nomogram: Bilirubin ١٨ + Hemolysis + عمر ٧٢ ساعة = High Risk Zone → <strong>Exchange Transfusion فوراً</strong> + Intensive Phototherapy بالتوازي.</div></div><div class="hy-box"><div class="hy-title">⭐ High-Yield</div><div class="hy-text">• Physiological Jaundice: تبدأ بعد ٢٤ ساعة وتذروتها يوم ٣-٤<br>• Kernicterus: Bilirubin مرتفع → تلف Basal Ganglia<br>• Rhogam: للـ Rh incompatibility مش ABO<br>• Breast Milk Jaundice: يستمر حتى الأسبوع الثالث</div></div>`},
+
+  {id:4,subject:'obg',subjectLabel:'OB/GYN',topic:'Obstetric Emergencies',diff:'EMLE-Level',
+   stem:'سيدة أسبوع ٣٢ بنزيف مهبلي مفاجئ غير مؤلم. Ultrasound: المشيمة تغطي عنق الرحم بالكامل. ضغط ١١٠/٧٠، نبض ٩٥، الجنين بخير.',
+   question:'ما هو التدبير الCorrect؟',
+   options:['PV Exam لتقييم عنق الرحم','استشفاء فوري مع Bed Rest وعدم إجراء PV Exam','حقن Oxytocin لتسريع الولادة','Amniotomy','External Cephalic Version'],
+   correct:1,
+   exp:`<div class="exp-sec"><div class="exp-sec-title">التشخيص</div><div class="exp-sec-text"><strong>Placenta Previa Centralis</strong>: نزيف غير مؤلم + المشيمة تغطي OS = Placenta Previa. النزيف "التحذيري" (Warning Bleed).</div></div><div class="exp-sec"><div class="exp-sec-title">لماذا B صح؟</div><div class="exp-sec-text">1. <strong>PV Exam = ممنوع تماماً</strong> (خطر نزيف كارثي)<br>2. استشفاء فوري + Bed Rest + تجهيز دم<br>3. أسبوع ٣٢: نحاول تأخير الولادة لإنضاج الرئتين</div></div><div class="hy-box"><div class="hy-title">⭐ الفرق المهم</div><div class="hy-text">• Placenta Previa: نزيف غير مؤلم، رحم ناعم<br>• Placental Abruption: نزيف مؤلم، رحم صلب (Rigid Uterus)<br>• Previa → C-Section إلزامي<br>• Vasa Previa: نزيف + Fetal distress → جراحة فورية</div></div>`},
+
+  {id:5,subject:'em',subjectLabel:'Emergency Medicine',topic:'Toxicology',diff:'EMLE-Level',
+   stem:'شاب ٢٥ سنة فقدان وعي بعد تناول جرعة كبيرة من Paracetamol من ٤ ساعات. نصف واعي، ضغط ١٠٠/٧٠، مستوى Paracetamol في الدم مرتفع جداً.',
+   question:'ما أهم تدخل علاجي؟',
+   options:['Activated Charcoal فوراً','N-Acetylcysteine (NAC) IV فوراً','Gastric Lavage','Flumazenil IV','Sodium Bicarbonate IV'],
+   correct:1,
+   exp:`<div class="exp-sec"><div class="exp-sec-title">التسمم بـ Paracetamol</div><div class="exp-sec-text">أشهر سبب لـ Acute Liver Failure: يتحول لـ <strong>NAPQI</strong> (سام) يتراكم في الكبد. أعراض ٤-٢٤ ساعة: قليلة أو غياب. ٢٤-٧٢ ساعة: بداية Liver Necrosis.</div></div><div class="exp-sec"><div class="exp-sec-title">لماذا B صح؟</div><div class="exp-sec-text"><strong>N-Acetylcysteine (NAC)</strong> = الترياق الأساسي: يعمل Glutathione Donor لمنع تراكم NAPQI. فعّال في أول ٨-١٠ ساعات لكن نعطيه حتى بعد ذلك. Activated Charcoal = لو < ٢ ساعة من الجرعة.</div></div><div class="hy-box"><div class="hy-title">⭐ Antidotes</div><div class="hy-text">• Flumazenil: Benzodiazepines<br>• Naloxone: Opioids (Pinpoint pupils + Bradypnea)<br>• Sodium Bicarbonate: TCA overdose (Wide QRS)<br>• Atropine: Organophosphate poisoning (SLUDGE)</div></div>`},
+
+  {id:6,subject:'im',subjectLabel:'Internal Medicine',topic:'Cardiology',diff:'EMLE-Level',
+   stem:'رجل ٦٠ سنة بألم صدر حاد ينتشر للذراع الشمالية من ساعتين. ECG: ST elevation في V1-V4. Troponin مرتفع. ضغط ١٤٠/٩٠، نبض ٩٠/دقيقة.',
+   question:'ما هو التدبير الأولوية القصوى؟',
+   options:['Aspirin ٣٢٥mg فوراً ثم Primary PCI','Echocardiography لتأكيد التشخيص','Heparin IV فقط','انتظار Troponin الثانية','Morphine وبيتا بلوكر فقط'],
+   correct:0,
+   exp:`<div class="exp-sec"><div class="exp-sec-title">Anterior STEMI</div><div class="exp-sec-text">ST elevation V1-V4 = <strong>Anterior STEMI</strong> (LAD Territory). "Time is Muscle" – هدف: <strong>Door-to-Balloon Time < ٩٠ دقيقة</strong>.</div></div><div class="exp-sec"><div class="exp-sec-title">بروتوكول STEMI</div><div class="exp-sec-text">• <strong>Aspirin ٣٢٥mg + Clopidogrel/Ticagrelor</strong> فوراً<br>• Morphine (لو ألم شديد)<br>• Oxygen (لو SpO₂ < ٩٤٪)<br>• Nitrates Sublingual<br>• <strong>Primary PCI = الخيار الأفضل</strong></div></div><div class="hy-box"><div class="hy-title">⭐ PCI vs Thrombolysis</div><div class="hy-text">• Primary PCI: أفضل لو متاح في < ١٢٠ دقيقة<br>• Thrombolysis: لو PCI غير متاح + وقت < ١٢ ساعة<br>• Contraindications Thrombolysis: Recent surgery, Stroke < 3m, Active bleeding</div></div>`},
+
+  {id:7,subject:'peds',subjectLabel:'Pediatrics',topic:'Respiratory',diff:'EMLE-Level',
+   stem:'طفل ١٨ شهر بصوت أجش وسعال نابح من أمس. زكام بسيط قبل يومين. حرارة ٣٧.٨. الأعراض تزيد بالليل.',
+   question:'ما هو التشخيص والتدبير؟',
+   options:['Acute Epiglottitis – غرفة العمليات فوراً','Croup – Dexamethasone + Nebulized Epinephrine','Foreign Body Aspiration – Bronchoscopy','Bacterial Tracheitis – مضاد حيوية IV','Asthma – Salbutamol Nebulizer'],
+   correct:1,
+   exp:`<div class="exp-sec"><div class="exp-sec-title">Viral Croup</div><div class="exp-sec-text"><strong>Laryngotracheobronchitis</strong>: Parainfluenza Virus. عمر ٦ شهور-٣ سنوات. Barking Cough + Stridor + URTI قبلها. يزيد بالليل. Steeple Sign في X-Ray العنق.</div></div><div class="exp-sec"><div class="exp-sec-title">العلاج</div><div class="exp-sec-text">• Mild-Moderate: <strong>Oral/IM Dexamethasone 0.6 mg/kg</strong> (جرعة واحدة)<br>• Severe: + Nebulized Epinephrine (Racemic / L-Epi)<br>• Humidified cool air يساعد</div></div><div class="hy-box"><div class="hy-title">⭐ Croup vs Epiglottitis</div><div class="hy-text">• Croup: تدريجي، Barking Cough، طفل مبسوط نسبياً<br>• Epiglottitis: مفاجئ، Drooling، Toxic appearance، Tripod Position<br>• Epiglottitis → لا تفحص الحلق → secure airway أولاً</div></div>`},
+
+  {id:8,subject:'im',subjectLabel:'Internal Medicine',topic:'Endocrinology',diff:'EMLE-Level',
+   stem:'سيدة ٤٥ سنة بإرهاق وكسب وزن وبرودة من ٦ شهور. وجه منتفخ، بطء كلام، شعر خشن. TSH = ١٢ mIU/L، Free T4 منخفض.',
+   question:'ما أخطر مضاعفة ممكن تحدث لو تركنا الحالة دون علاج؟',
+   options:['Thyroid Storm','Myxedema Coma','Graves Disease','Thyroid Cancer','Adrenal Crisis'],
+   correct:1,
+   exp:`<div class="exp-sec"><div class="exp-sec-title">Primary Hypothyroidism</div><div class="exp-sec-text">TSH مرتفع (الغدة النخامية تصرخ!) + Free T4 منخفض = <strong>Primary Hypothyroidism</strong>. أشيع سبب: Hashimoto's Thyroiditis (Anti-TPO+).</div></div><div class="exp-sec"><div class="exp-sec-title">Myxedema Coma</div><div class="exp-sec-text"><strong>Myxedema Coma</strong> = أخطر مضاعفة: Hypothermia + Altered Consciousness + Bradycardia + Hypoventilation. محفّزات: برد، عدوى، مهدئات. علاج: IV T4 + Hydrocortisone.</div></div><div class="hy-box"><div class="hy-title">⭐ Thyroid Storm ≠ Myxedema Coma</div><div class="hy-text">• Thyroid Storm = مضاعفة Hyperthyroidism (TSH منخفض، T4 مرتفع)<br>• Hashimoto: Anti-TPO + Anti-Thyroglobulin<br>• علاج Hypothyroidism: Levothyroxine يومياً<br>• TSH الهدف: ٠.٥-٢.٥ mIU/L</div></div>`},
+
+  {id:9,subject:'surg',subjectLabel:'General Surgery',topic:'Trauma',diff:'EMLE-Level',
+   stem:'رجل ٣٥ سنة حادث سيارة. ضغط ٨٠/٥٠، نبض ١٣٠، وعي منخفض. بطن صلب. FAST Exam: سائل في البطن.',
+   question:'ما الإجراء الأنسب فوراً؟',
+   options:['CT بطن وحوض','Diagnostic Peritoneal Lavage','Exploratory Laparotomy فوراً (Damage Control)','Angioembolization','مراقبة وعمل CT بعد تثبيت الضغط'],
+   correct:2,
+   exp:`<div class="exp-sec"><div class="exp-sec-title">Hemorrhagic Shock + Positive FAST</div><div class="exp-sec-text">المريض في <strong>Hemorrhagic Shock Class IV</strong>: ضغط < ٩٠ + Tachycardia + Altered consciousness + FAST+ = Internal Bleeding. غير مستقر ديناميكياً → لا وقت لـ CT.</div></div><div class="exp-sec"><div class="exp-sec-title">لماذا C صح؟</div><div class="exp-sec-text">Unstable + FAST+ → <strong>Emergency Laparotomy (Damage Control Surgery)</strong> فوراً: Stop Bleeding + Contamination → ICU → Re-look بعد ٢٤-٤٨ ساعة.</div></div><div class="hy-box"><div class="hy-title">⭐ ATLS Algorithm</div><div class="hy-text">• Stable + FAST+ → CT Scan<br>• Unstable + FAST+ → مباشرة غرفة العمليات<br>• Unstable + FAST- → فكر في Pelvic Fracture أو Thoracic Bleeding<br>• "Damage Control" = أسرع عملية لإنقاذ الحياة</div></div>`},
+
+  {id:10,subject:'obg',subjectLabel:'OB/GYN',topic:'Gynecology',diff:'EMLE-Level',
+   stem:'سيدة ٢٨ سنة بألم حوضي حاد وانقطاع طمث ٧ أسابيع. HCG إيجابي. Cervical Motion Tenderness +. Ultrasound: لا حمل في الرحم. Hb = ٩ g/dL.',
+   question:'ما التدبير الأنسب؟',
+   options:['Methotrexate IM فوراً','Laparoscopy أو Laparotomy فوراً','مراقبة β-hCG كل ٤٨ ساعة','إعطاء Progesterone','Antibiotics IV'],
+   correct:1,
+   exp:`<div class="exp-sec"><div class="exp-sec-title">Ruptured Ectopic Pregnancy</div><div class="exp-sec-text">انقطاع طمث + HCG+ + لا حمل في الرحم = Ectopic. CMT + Anemia (Hb ٩) = نزيف داخلي = <strong>Ruptured Ectopic</strong>. طوارئ جراحية!</div></div><div class="exp-sec"><div class="exp-sec-title">لماذا B صح؟</div><div class="exp-sec-text">المريضة غير مستقرة (Anemia + Pain) → <strong>Laparoscopy/Laparotomy فوراً</strong> = وقف النزيف. Methotrexate = للـ Ectopic غير المتمزق + المستقرة فقط.</div></div><div class="hy-box"><div class="hy-title">⭐ Methotrexate Criteria</div><div class="hy-text">• Hemodynamically Stable<br>• β-hCG < ٥٠٠٠ mIU/mL<br>• لا نبضات قلبية جنينية<br>• Unruptured Ectopic<br>• No renal/hepatic disease</div></div>`},
+
+  {id:11,subject:'im',subjectLabel:'Internal Medicine',topic:'Nephrology',diff:'EMLE-Level',
+   stem:'رجل ٤٥ سنة Diabetes Type 2 من ١٠ سنوات. Creatinine ٢.١، GFR ٣٨، ضغط ١٥٠/٩٥، بروتين في البول (+٣).',
+   question:'ما أفضل علاج لإبطاء تدهور الكلى؟',
+   options:['Metformin جرعة مضاعفة','ACE Inhibitor أو ARB + ضبط السكر والضغط','Calcium Channel Blocker فقط','Furosemide يومياً','Dialysis فوراً'],
+   correct:1,
+   exp:`<div class="exp-sec"><div class="exp-sec-title">Diabetic Nephropathy – CKD Stage 3b</div><div class="exp-sec-text">Diabetes + HTN + Proteinuria + ↑Creatinine = <strong>Diabetic Nephropathy</strong>. GFR ٣٨ → CKD Stage 3b. الهدف: إبطاء التدهور وتأخير الديلزة.</div></div><div class="exp-sec"><div class="exp-sec-title">لماذا B صح؟</div><div class="exp-sec-text"><strong>ACEI/ARB</strong>: يخفضون الضغط داخل الكبيبة + يقللون Proteinuria + يحمون الكلى بشكل مستقل. <strong>First-line في Diabetic Nephropathy مع Proteinuria.</strong></div></div><div class="hy-box"><div class="hy-title">⭐ High-Yield</div><div class="hy-text">• Metformin: ممنوع لو GFR < ٣٠ (Lactic Acidosis)<br>• SGLT2 Inhibitors: cardio-renoprotective<br>• ضغط الهدف < ١٣٠/٨٠ في Diabetic Nephropathy<br>• Avoid NSAIDs + Nephrotoxic agents</div></div>`},
+
+  {id:12,subject:'peds',subjectLabel:'Pediatrics',topic:'Infectious Disease',diff:'EMLE-Level',
+   stem:'طفل ٤ سنوات، حرارة ٤٠ من يومين، طفح حول الفم والأرداف وباطن الأقدام (بثور صغيرة). يشتكي ألم حلق ورفض أكل.',
+   question:'ما التشخيص والتدبير؟',
+   options:['Chicken Pox – Acyclovir','Measles – عزل وعلاج داعم','Hand, Foot and Mouth Disease – علاج داعم فقط','Herpes Simplex – Acyclovir IV','Scarlet Fever – Amoxicillin'],
+   correct:2,
+   exp:`<div class="exp-sec"><div class="exp-sec-title">HFMD</div><div class="exp-sec-text"><strong>Hand, Foot and Mouth Disease</strong>: Coxsackievirus A16 أو Enterovirus 71. عمر < ٥ سنوات. Vesicular Rash حول الفم + كفوف الأيدي والأقدام. Herpangina: تقرحات الحلق → رفض الأكل.</div></div><div class="exp-sec"><div class="exp-sec-title">العلاج</div><div class="exp-sec-text">لا علاج محدد: <strong>Supportive Care</strong> فقط: Paracetamol + ترطيب + مسكنات. عزل من المدرسة حتى شفاء البثور. عادةً يتعافى خلال ٧-١٠ أيام.</div></div><div class="hy-box"><div class="hy-title">⭐ Viral Rashes التفريق</div><div class="hy-text">• Varicella: من الجذع → centrifugal، مراحل مختلفة<br>• Measles: Koplik Spots + Cephalocaudal<br>• Roseola (HHV-6): حرارة ٣ أيام ثم Rash عند نهاية الحرارة<br>• HFMD: كفوف + رجلين + حوالين الفم</div></div>`},
+
+  {id:13,subject:'im',subjectLabel:'Internal Medicine',topic:'Gastroenterology',diff:'EMLE-Level',
+   stem:'رجل ٥٠ سنة بآلام معدة بعد الأكل وMelena من أسبوع. يشرب Ibuprofen يومياً من سنة. Endoscopy: قرحة معدة ٢cm، CLO Test +.',
+   question:'ما النظام العلاجي الأمثل؟',
+   options:['Omeprazole فقط','Triple Therapy: PPI + Amoxicillin + Clarithromycin × ١٤ يوم + إيقاف NSAID','H2 Blocker فقط','Sucralfate فقط','Misoprostol فقط'],
+   correct:1,
+   exp:`<div class="exp-sec"><div class="exp-sec-title">H. pylori + NSAID-induced PUD</div><div class="exp-sec-text">CLO Test+ = <strong>H. pylori infection</strong>. NSAID يومي = عامل ثانٍ. Melena = Upper GI Bleeding (دم هُضم في الأمعاء). لازم نعالج السببين.</div></div><div class="exp-sec"><div class="exp-sec-title">Triple Therapy</div><div class="exp-sec-text">• <strong>PPI (Omeprazole 20mg) × ١٤ يوم</strong><br>• Amoxicillin 1g مرتين/يوم<br>• Clarithromycin 500mg مرتين/يوم<br>• + إيقاف NSAID أو استبدالها بـ Celecoxib + PPI</div></div><div class="hy-box"><div class="hy-title">⭐ H. pylori Facts</div><div class="hy-text">• ٩٥٪ من Duodenal Ulcers، ٧٠٪ من Gastric Ulcers<br>• تأكيد Eradication: Urea Breath Test بعد ٤ أسابيع<br>• لو فشل Triple: Quadruple Therapy + Bismuth<br>• Duodenal ulcer: يتحسن بالأكل. Gastric: يزيد بالأكل</div></div>`},
+
+  {id:14,subject:'surg',subjectLabel:'General Surgery',topic:'Breast',diff:'EMLE-Level',
+   stem:'سيدة ٤٢ سنة بكتلة في الثدي الأيسر من ٣ شهور. صلبة، حواف غير منتظمة، غير مؤلمة، لا تتحرك بسهولة. BIRADS 5. US: كتلة صلبة ٢cm مع Spiculated Margins.',
+   question:'ما الخطوة التالية الأهم؟',
+   options:['Fine Needle Aspiration Cytology (FNAC)','Core Needle Biopsy + Receptor Testing (ER/PR/HER2)','Excision Biopsy كاملة مباشرة','MRI ثدي','مراقبة ٦ شهور ثم إعادة Mammography'],
+   correct:1,
+   exp:`<div class="exp-sec"><div class="exp-sec-title">BIRADS 5 = > ٩٥٪ Malignancy</div><div class="exp-sec-text">Triple Assessment: Clinical + Imaging + <strong>Histology (Biopsy) = الذهبي</strong>. BIRADS 5 = نحتاج Tissue Diagnosis فوراً قبل أي قرار جراحي.</div></div><div class="exp-sec"><div class="exp-sec-title">لماذا B صح؟</div><div class="exp-sec-text"><strong>Core Needle Biopsy</strong> أفضل من FNAC: يعطي Histology كاملة + ER/PR/HER2 Status. Receptor Status يحدد خطة العلاج الكاملة (Surgery + Chemo + Hormonal + Targeted).</div></div><div class="hy-box"><div class="hy-title">⭐ Breast Cancer Subtypes</div><div class="hy-text">• Luminal A (ER+/PR+, HER2-): أفضل prognosis، Hormonal Therapy<br>• HER2+: Trastuzumab (Herceptin)<br>• Triple Negative: Chemo فقط، أسوأ prognosis<br>• BRCA1/2: Genetic testing للعائلة</div></div>`},
+
+  {id:15,subject:'em',subjectLabel:'Emergency Medicine',topic:'Resuscitation',diff:'EMLE-Level',
+   stem:'رجل ٧٠ سنة وصل الإسعاف في فقدان وعي. ECG: Ventricular Fibrillation (VF). لا ضغط، لا نبض.',
+   question:'ما التدبير الأول والأهم؟',
+   options:['Epinephrine IV 1mg فوراً','Amiodarone 300mg IV','Defibrillation Unsynchronized 200J فوراً','Lidocaine IV','CPR فقط لمدة دقيقتين'],
+   correct:2,
+   exp:`<div class="exp-sec"><div class="exp-sec-title">VF = Shockable Rhythm</div><div class="exp-sec-text"><strong>Ventricular Fibrillation = Cardiac Arrest</strong>. ACLS Algorithm: VF + No Pulse = <strong>Defibrillate فوراً بدون تأخير</strong>. "Don't Stop for Anything – Shock First!"</div></div><div class="exp-sec"><div class="exp-sec-title">لماذا C صح؟</div><div class="exp-sec-text">VF = Shockable Rhythm → <strong>Unsynchronized Defibrillation 200J Biphasic</strong> = العلاج الوحيد الفعّال. Epinephrine يأتي بعد Shock الأول. CPR فوراً بعد الصدمة لمدة ٢ دقيقة.</div></div><div class="hy-box"><div class="hy-title">⭐ ACLS Shockable vs Non-Shockable</div><div class="hy-text">• Shockable (VF + pVT): Defibrillate + CPR + Epi + Amiodarone<br>• Non-Shockable (Asystole + PEA): CPR + Epinephrine + علاج 4H+4T<br>• 4H: Hypoxia, Hypovolemia, Hypo/Hyperkalemia, Hypothermia<br>• 4T: Tamponade, Tension Pneumo, Thrombosis, Toxins</div></div>`},
+];
+
+/* ══════════════════════════════════
+   STATE
+══════════════════════════════════ */
+const S = {
+  questions:[], idx:0, mode:'timed',
+  answers:{}, flags:{}, strikeModeOn:false,
+  timerSecs:10800, timerInterval:null,
+  tutorMode:false, sidebarOpen:true,
+  examStarted:false, examEnded:false,
+  startTime:null, reviewMode:false,
+};
+
+/* ══════════════════════════════════
+   SETUP
+══════════════════════════════════ */
+function selMode(m, el) {
+  S.mode = m;
+  document.getElementById('mTimedBtn').classList.toggle('sel', m==='timed');
+  document.getElementById('mTutorBtn').classList.toggle('sel', m==='tutor');
+  if (m==='tutor') S.tutorMode=true; else S.tutorMode=false;
+}
+
+function startExam() {
+  const countVal = document.getElementById('sCount').value;
+  const subj = document.getElementById('sSubject').value;
+  const weak = document.getElementById('weakChk').checked;
+
+  // Filter questions
+  let pool = [...QBANK];
+  if (subj !== 'all') pool = pool.filter(q=>q.subject===subj);
+  if (weak) {
+    // simulate weak areas: shuffle and take IM + Peds preferably
+    pool.sort(()=>Math.random()-0.5);
+  } else {
+    pool.sort(()=>Math.random()-0.5);
+  }
+  const count = countVal==='all' ? pool.length : Math.min(parseInt(countVal), pool.length);
+  S.questions = pool.slice(0, count);
+
+  if (S.questions.length===0) { showToast('⚠️ لا أسئلة متاحة بهذه الفلترة!'); return; }
+
+  S.timerSecs = S.mode==='timed' ? count*108 : 0; // ~1.8 min/q
+  S.startTime = Date.now();
+
+  // Show exam
+  document.getElementById('setupScreen').style.display='none';
+  const exam = document.getElementById('examScreen');
+  exam.style.display='flex'; exam.classList.add('active');
+
+  // Update badges
+  document.getElementById('modeBadge').textContent = S.tutorMode ? '🎓 Tutor Mode' : '⏱ Timed Mode';
+  document.getElementById('subjectBadge').textContent = subj==='all'?'All Subjects':document.getElementById('sSubject').options[document.getElementById('sSubject').selectedIndex].text;
+  document.getElementById('tutorToggleBtn').textContent = S.tutorMode ? '🎓 Tutor: On' : '🎓 Tutor: Off';
+  document.getElementById('tutorToggleBtn').classList.toggle('on', S.tutorMode);
+
+  // Init nav grid
+  buildGrid();
+  // Start timer
+  if (S.mode==='timed') startTimer();
+  // Render first question
+  renderQ();
+  S.examStarted=true;
+}
+
+/* ══════════════════════════════════
+   TIMER
+══════════════════════════════════ */
+function startTimer() {
+  updateTimerDisplay();
+  S.timerInterval = setInterval(()=>{
+    S.timerSecs--;
+    updateTimerDisplay();
+    if (S.timerSecs<=0) { clearInterval(S.timerInterval); endExam(); }
+  },1000);
+}
+function updateTimerDisplay() {
+  const el = document.getElementById('timerDisplay');
+  const h = Math.floor(S.timerSecs/3600);
+  const m = Math.floor((S.timerSecs%3600)/60);
+  const s = S.timerSecs%60;
+  el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  el.className = '';
+  if (S.timerSecs < 300) el.className = 'danger';
+  else if (S.timerSecs < 600) el.className = 'warn';
+}
+
+/* ══════════════════════════════════
+   RENDER QUESTION
+══════════════════════════════════ */
+function renderQ() {
+  const q = S.questions[S.idx];
+  const answered = S.answers[S.idx] !== undefined;
+  const showExp = S.tutorMode && answered;
+  const revMode = S.reviewMode;
+
+  // Q counter
+  document.getElementById('qCount').textContent = `${S.idx+1} / ${S.questions.length}`;
+
+  // Prev/next
+  document.getElementById('prevBtn').disabled = S.idx===0;
+  document.getElementById('nextBtn').disabled = S.idx===S.questions.length-1;
+
+  // Flag btn state
+  const flagBtn = document.getElementById('flagToolBtn');
+  flagBtn.classList.toggle('flagged', !!S.flags[S.idx]);
+  document.getElementById('finishBtn').style.display = S.idx===S.questions.length-1 ? 'flex':'none';
+
+  // Check btn
+  const checkBtn = document.getElementById('checkBtn');
+  if (answered || revMode) {
+    checkBtn.textContent='✓ Confirmed'; checkBtn.disabled=true;
+  } else {
+    checkBtn.textContent='✓ Confirm Answer'; checkBtn.disabled=false;
+  }
+
+  // Subject class
+  const sc = {im:'im',surg:'surg',peds:'peds',obg:'obg',em:'em'}[q.subject]||'im';
+
+  const html = `
+    <div class="q-meta">
+      <span class="qm-badge ${sc}">${q.subjectLabel}</span>
+      <span class="qm-badge" style="background:rgba(139,92,246,0.08);color:#7C3AED">${q.topic}</span>
+      <span class="qm-badge diff">${q.diff}</span>
+      <button class="flag-btn ${S.flags[S.idx]?'flagged':''}" onclick="toggleFlag()">
+        🚩 ${S.flags[S.idx]?'تم التحديد':'تحديد للمراجعة'}
+      </button>
+    </div>
+    <div class="q-stem">
+      <span class="q-stem-lbl">📋 Clinical Vignette</span>
+      ${q.stem}
+    </div>
+    <div class="q-question">❓ ${q.question}</div>
+    <div class="options" id="optsList">
+      ${q.options.map((opt,i)=>{
+        let cls='opt';
+        const userAns = S.answers[S.idx];
+        if ((answered||revMode) && i===q.correct) cls+=' correct';
+        if ((answered||revMode) && userAns===i && i!==q.correct) cls+=' wrong';
+        if ((answered||revMode) && userAns!==i && i===q.correct && userAns!==undefined) cls+=' correct-missed';
+        if (userAns===i && !answered) cls+=' sel';
+        if (answered||revMode) cls+=' disabled';
+        if (S.strikeModeOn && !answered) cls+=' strike-mode-target';
+        const resultIcon = (answered||revMode) ? (i===q.correct?'<span class="opt-result">✅</span>':(userAns===i?'<span class="opt-result">❌</span>':'')) : '';
+        return `<div class="${cls}" onclick="selectOpt(${i})" id="opt-${i}">
+          <div class="opt-letter">${'ABCDE'[i]}</div>
+          <div class="opt-text">${opt}</div>
+          ${resultIcon}
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="explanation ${showExp||revMode?'show':''}" id="expBox">
+      <div class="exp-header"><span class="exp-icon">💡</span><span class="exp-title">الشرح التفصيلي – AI EMLE Coach</span></div>
+      <div class="exp-body">${q.exp}</div>
+    </div>`;
+
+  document.getElementById('qArea').innerHTML = html;
+  document.getElementById('qPanel').scrollTop=0;
+  updateGrid();
+  updateSidebarProgress();
+}
+
+/* ══════════════════════════════════
+   SELECT OPTION
+══════════════════════════════════ */
+function selectOpt(i) {
+  if (S.answers[S.idx]!==undefined || S.reviewMode) return;
+  const q = S.questions[S.idx];
+
+  if (S.strikeModeOn) {
+    const el = document.getElementById(`opt-${i}`);
+    el.classList.toggle('strike');
+    return;
+  }
+
+  // Deselect all
+  document.querySelectorAll('.opt').forEach(o=>o.classList.remove('sel'));
+  document.getElementById(`opt-${i}`).classList.add('sel');
+
+  // Store pending answer
+  document.getElementById('checkBtn').dataset.pending = i;
+  document.getElementById('checkBtn').disabled = false;
+}
+
+/* ══════════════════════════════════
+   CHECK ANSWER
+══════════════════════════════════ */
+function checkAnswer() {
+  if (S.reviewMode) return;
+  const q = S.questions[S.idx];
+  const pending = document.getElementById('checkBtn').dataset.pending;
+
+  if (pending===undefined||pending==='') {
+    showToast('⚠️ Please select an answer first!'); return;
+  }
+  const sel = parseInt(pending);
+  S.answers[S.idx] = sel;
+
+  // Apply correct/wrong classes
+  document.querySelectorAll('.opt').forEach((el,i)=>{
+    el.classList.add('disabled');
+    if (i===q.correct) { el.classList.add('correct'); el.innerHTML+=`<span class="opt-result">✅</span>`; }
+    else if (i===sel && sel!==q.correct) { el.classList.add('wrong'); el.innerHTML+=`<span class="opt-result">❌</span>`; }
+    else if (i!==sel && i===q.correct) el.classList.add('correct-missed');
+    el.classList.remove('sel');
+  });
+
+  // Show explanation if tutor mode
+  if (S.tutorMode) document.getElementById('expBox').classList.add('show');
+
+  // Update check btn
+  const cb = document.getElementById('checkBtn');
+  cb.textContent='✓ Confirmed'; cb.disabled=true;
+
+  // Feedback toast
+  if (sel===q.correct) showToast('✅ إجابة Correctة! ممتاز 🎉');
+  else showToast(`❌ إجابة Wrongة. الصح: ${q.options[q.correct].substring(0,30)}...`);
+
+  updateGrid();
+  updateSidebarProgress();
+
+  // Auto-advance in tutor mode after delay
+  if (S.tutorMode && S.idx < S.questions.length-1) {
+    setTimeout(()=>{ if (!S.reviewMode) go(1); }, 3500);
+  }
+}
+
+/* ══════════════════════════════════
+   NAVIGATION
+══════════════════════════════════ */
+function go(dir) {
+  const next = S.idx + dir;
+  if (next<0||next>=S.questions.length) return;
+  S.idx=next;
+  renderQ();
+  document.getElementById('qPanel').scrollTop=0;
+}
+
+/* ══════════════════════════════════
+   FLAG
+══════════════════════════════════ */
+function toggleFlag() {
+  S.flags[S.idx] = !S.flags[S.idx];
+  const btn = document.getElementById('flagToolBtn');
+  btn.classList.toggle('flagged', S.flags[S.idx]);
+  const metaBtn = document.querySelector('.flag-btn');
+  if (metaBtn) {
+    metaBtn.classList.toggle('flagged', S.flags[S.idx]);
+    metaBtn.textContent = S.flags[S.idx] ? '🚩 تم التحديد' : '🚩 تحديد للمراجعة';
+  }
+  updateGrid();
+  showToast(S.flags[S.idx]?'🚩 Question flagged for review':'تم Cancel التحديد');
+}
+
+/* ══════════════════════════════════
+   STRIKE MODE
+══════════════════════════════════ */
+function toggleStrikeMode() {
+  S.strikeModeOn = !S.strikeModeOn;
+  const btn = document.getElementById('strikeToolBtn');
+  btn.classList.toggle('striking', S.strikeModeOn);
+  showToast(S.strikeModeOn?'✂️ Strike-through mode ON — click an option to cross it out':'✂️ Strike-through mode OFF');
+}
+
+/* ══════════════════════════════════
+   TUTOR TOGGLE
+══════════════════════════════════ */
+function toggleTutor() {
+  S.tutorMode = !S.tutorMode;
+  const btn = document.getElementById('tutorToggleBtn');
+  btn.textContent = S.tutorMode?'🎓 Tutor: On':'🎓 Tutor: Off';
+  btn.classList.toggle('on', S.tutorMode);
+  // Show/hide current explanation
+  const expBox = document.getElementById('expBox');
+  if (expBox && S.answers[S.idx]!==undefined) {
+    if (S.tutorMode) expBox.classList.add('show');
+    else expBox.classList.remove('show');
+  }
+}
+
+/* ══════════════════════════════════
+   SIDEBAR
+══════════════════════════════════ */
+function toggleSidebar() {
+  S.sidebarOpen = !S.sidebarOpen;
+  document.getElementById('sidebar').classList.toggle('collapsed', !S.sidebarOpen);
+}
+function buildGrid() {
+  const grid = document.getElementById('qGrid');
+  grid.innerHTML = S.questions.map((_,i)=>`
+    <button class="qn-btn" id="qn-${i}" onclick="jumpTo(${i})">${i+1}</button>`).join('');
+}
+function updateGrid() {
+  S.questions.forEach((_,i)=>{
+    const el=document.getElementById(`qn-${i}`);
+    if(!el)return;
+    el.className='qn-btn';
+    if(i===S.idx) el.classList.add('cur');
+    else if(S.answers[i]!==undefined){
+      el.classList.add(S.answers[i]===S.questions[i].correct?'ans-right':'ans-wrong');
+    }
+    if(S.flags[i]) el.classList.add('flag-mark');
+  });
+}
+function updateSidebarProgress() {
+  const answered = Object.keys(S.answers).length;
+  const total = S.questions.length;
+  const pct = total>0?(answered/total*100):0;
+  document.getElementById('sbProgFill').style.width=pct+'%';
+  document.getElementById('sbAnswered').textContent=answered+' answered';
+  document.getElementById('sbTotal').textContent=total+' total';
+}
+function jumpTo(i) {
+  S.idx=i; renderQ();
+  document.getElementById('qPanel').scrollTop=0;
+}
+
+/* ══════════════════════════════════
+   END EXAM
+══════════════════════════════════ */
+function endExam() {
+  closeModal('endModal');
+  clearInterval(S.timerInterval);
+  S.examEnded=true;
+
+  // Calculate results
+  const total = S.questions.length;
+  let correct=0, wrong=0;
+  S.questions.forEach((_,i)=>{
+    const a=S.answers[i];
+    if(a===undefined) return;
+    if(a===S.questions[i].correct) correct++;
+    else wrong++;
+  });
+  const skipped = total-correct-wrong;
+  const accuracy = total>0?Math.round((correct/total)*100):0;
+
+  // Time taken
+  const elapsed = Math.floor((Date.now()-S.startTime)/1000);
+  const em=Math.floor(elapsed/60), es=elapsed%60;
+  const timeStr=`${String(em).padStart(2,'0')}:${String(es).padStart(2,'0')}`;
+
+  // Grade
+  let title, sub;
+  if (accuracy>=85){title='🏆 Outstanding! Exceptional performance';sub='You are very well-prepared for EMLE. Keep it up!';}
+  else if (accuracy>=70){title='👍 Good Job!';sub='Good performance! Focus on weak topics to improve your score.';}
+  else if (accuracy>=55){title='📚 Needs More Study';sub='Focus on reviewing and use SmartCards to improve retention.';}
+  else{title='💪 Keep Studying';sub="Don't give up! Review each explanation and try again.";}
+
+  document.getElementById('rScore').textContent=correct;
+  document.getElementById('rTotal').textContent=total;
+  document.getElementById('rTitle').textContent=title;
+  document.getElementById('rSub').textContent=sub;
+  document.getElementById('rCorrect').textContent=correct;
+  document.getElementById('rWrong').textContent=wrong;
+  document.getElementById('rSkipped').textContent=skipped;
+  document.getElementById('rAccuracy').textContent=accuracy+'%';
+  document.getElementById('rTime').textContent=timeStr;
+
+  // Show results
+  document.getElementById('qArea').style.display='none';
+  document.getElementById('resultsScreen').classList.add('show');
+  document.querySelector('.bottombar').style.display='none';
+}
+
+function reviewExam() {
+  S.reviewMode=true;
+  document.getElementById('qArea').style.display='';
+  document.getElementById('resultsScreen').classList.remove('show');
+  document.querySelector('.bottombar').style.display='flex';
+  S.idx=0; renderQ();
+  showToast('📖 Review Mode: See your answers and explanations');
+}
+
+/* ══════════════════════════════════
+   MODAL
+══════════════════════════════════ */
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+/* ══════════════════════════════════
+   THEME
+══════════════════════════════════ */
+function toggleTheme() {
+  const cur=document.documentElement.getAttribute('data-theme')||'light';
+  const next=cur==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',next);
+  localStorage.setItem('emle_theme',next);
+}
+
+/* ══════════════════════════════════
+   TOAST
+══════════════════════════════════ */
+function showToast(msg) {
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.style.opacity='1'; el.style.transform='translateY(0)';
+  setTimeout(()=>{el.style.opacity='0';el.style.transform='translateY(10px)';},2800);
+}
+
+/* ══════════════════════════════════
+   INIT
+══════════════════════════════════ */
+const savedTheme=localStorage.getItem('emle_theme')||'light';
+document.documentElement.setAttribute('data-theme',savedTheme);
+
+// Keyboard shortcuts
+document.addEventListener('keydown',e=>{
+  if(!S.examStarted||S.examEnded) return;
+  if(e.key==='ArrowLeft'||e.key==='ArrowDown') go(1);
+  if(e.key==='ArrowRight'||e.key==='ArrowUp') go(-1);
+  if(['1','2','3','4','5'].includes(e.key)) selectOpt(parseInt(e.key)-1);
+  if(e.key==='Enter') checkAnswer();
+  if(e.key==='f'||e.key==='F') toggleFlag();
+});
+</script>
+</body>
+</html>
